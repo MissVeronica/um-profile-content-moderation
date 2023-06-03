@@ -12,5 +12,7 @@ UM Settings -> General -> Users
 ## UM Admin Menu
 Additional UM sub-menu "Content Moderation" for listing of all Users waiting for content moderation.
 
+## UM Custom Templates
+
 ## Installation
 Download the zip file and install as a WP Plugin, activate the plugin.
