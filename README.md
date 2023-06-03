@@ -1,5 +1,5 @@
 # UM Profile Content Moderation
-Extension to Ultimate Member for Profile Content Moderation.
+Extension to Ultimate Member for Profile Content Moderation. User Profile edit will set the User into Admin Review which the Admin can releaee and accept the Profile updates. Discussions about unwanted user profile updates must be via standard emails or the Admin uses the Edit capability for the User Profile.
 
 ## UM Settings
 UM Settings -> General -> Users
