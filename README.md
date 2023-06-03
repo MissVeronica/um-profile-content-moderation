@@ -10,9 +10,12 @@ UM Settings -> General -> Users
 5. Content Moderation - Admin Notification - Select the Admin Notification Email template.
 
 ## UM Admin Menu
-Additional UM sub-menu "Content Moderation" for listing of all Users waiting for content moderation.
+Additional UM sub-menu "Content Moderation" for listing of all Users waiting for profile content moderation.
 
-## UM Custom Templates
+## UM Email Templates
+Create new custom email templates or use existing UM email templates.
+
+https://docs.ultimatemember.com/article/1515-how-to-add-and-use-custom-email-templates
 
 ## Installation
 Download the zip file and install as a WP Plugin, activate the plugin.
