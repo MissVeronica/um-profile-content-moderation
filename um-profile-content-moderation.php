@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Profile Content Moderation
  * Description:     Extension to Ultimate Member for Profile Content Moderation.
- * Version:         1.0.0
+ * Version:         1.1.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v3 or later
@@ -29,7 +29,9 @@ class UM_Profile_Content_Moderation {
             add_action(	'um_extend_admin_menu',  array( $this, 'um_extend_admin_menu_content_moderation' ), 10 );
             add_filter( 'pre_user_query',        array( $this, 'filter_users_content_moderation' ), 99 );
 
-            add_filter( 'um_disable_email_notification_sending', array( $this, 'um_disable_email_notification_content_moderation' ), 10, 4 );
+            add_action( "um_admin_custom_hook_um_deny_profile_update", array( $this, 'um_deny_profile_update_content_moderation' ), 10, 1 );
+            add_filter( 'um_disable_email_notification_sending',       array( $this, 'um_disable_email_notification_content_moderation' ), 10, 4 );
+            add_filter( 'um_admin_bulk_user_actions_hook',             array( $this, 'um_admin_bulk_user_actions_content_moderation' ), 10, 1 );
 
             $um_profile_forms = get_posts( array( 	'meta_key'    => '_um_mode',
                                                     'meta_value'  => 'profile',
@@ -49,6 +51,26 @@ class UM_Profile_Content_Moderation {
         }
 
         add_action( 'um_user_after_updating_profile', array( $this, 'um_user_after_updating_profile_set_pending' ), 10, 3 );
+    }
+
+    public function um_admin_bulk_user_actions_content_moderation( $actions ) {
+
+        if( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) {
+
+            $actions = array();
+
+            $actions['um_approve_membership']  = array( 'label' => __( 'Approve Profile Update', 'ultimate-member' ));				
+            $actions['um_deny_profile_update'] = array( 'label' => __( 'Deny Profile Update', 'ultimate-member' ));				
+            $actions['um_deactivate']          = array( 'label' => __( 'Deactivate', 'ultimate-member' ));				
+        }
+
+        return $actions;
+    } 
+
+    public function um_deny_profile_update_content_moderation( $uid ) {
+
+        um_fetch_user( $uid );
+        $this->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_denial_user_email' ) );
     }
 
     public function um_disable_email_notification_content_moderation( $false, $email, $template, $args ) {
@@ -175,7 +197,7 @@ class UM_Profile_Content_Moderation {
         $settings_structure['']['sections']['users']['fields'][] = array(
             'id'            => 'um_content_moderation_pending_user_email',
             'type'          => 'select',
-            'label'         => __( 'Content Moderation - User Pending Notification', 'uultimate-member' ),
+            'label'         => __( 'Content Moderation - User Pending Notification', 'ultimate-member' ),
             'tooltip'       => __( 'Select the User Pending Notification Email template.', 'ultimate-member' ),
             'options'       => $this->notification_emails,
             'size'          => 'medium',
@@ -184,8 +206,17 @@ class UM_Profile_Content_Moderation {
         $settings_structure['']['sections']['users']['fields'][] = array(
             'id'            => 'um_content_moderation_accept_user_email',
             'type'          => 'select',
-            'label'         => __( 'Content Moderation - User Accept Notification', 'uultimate-member' ),
+            'label'         => __( 'Content Moderation - User Accept Notification', 'ultimate-member' ),
             'tooltip'       => __( 'Select the User Accept Notification Email template.', 'ultimate-member' ),
+            'options'       => $this->notification_emails,
+            'size'          => 'medium',
+            );
+
+        $settings_structure['']['sections']['users']['fields'][] = array(
+            'id'            => 'um_content_moderation_denial_user_email',
+            'type'          => 'select',
+            'label'         => __( 'Content Moderation - User Denial Notification', 'ultimate-member' ),
+            'tooltip'       => __( 'Select the User Denial Notification Email template.', 'ultimate-member' ),
             'options'       => $this->notification_emails,
             'size'          => 'medium',
             );
