@@ -1,6 +1,6 @@
 <?php
 /**
- * Template for the "Content Moderation - User Accept Notification".
+ * Template for the "Content Moderation - Admin Notification".
  * Whether to send the admin an email when an account is updated.
  *
  * This template is saved at your custom location {your-theme}/ultimate-member/email/content_moderation_pending_admin_email.php
