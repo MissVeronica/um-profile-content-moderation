@@ -24,6 +24,7 @@ UM Settings -> General -> Users
 ## Updates
 1. Version 1.1.0 Addition of User Denial Notification Email and changed dropdown menu in UM sub-menu "Content Moderation".
 2. Version 2.0.0 Four new email templates. Backend users modal with before/after content of updated fields.
+3. Version 2.1.0 Modal notice of sent denial email and timestamp.
 
 ## Installation
 1. Download the zip file and install as a WP Plugin, activate the plugin.
