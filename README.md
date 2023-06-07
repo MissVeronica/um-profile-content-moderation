@@ -26,5 +26,5 @@ UM Settings -> General -> Users
 2. Version 2.0.0 Four new email templates. Backend users modal with before/after content of updated fields.
 
 ## Installation
-Download the zip file and install as a WP Plugin, activate the plugin.
-Email Templates will be copied to UM Template for emails when plugin is active.
+1. Download the zip file and install as a WP Plugin, activate the plugin.
+2. New Email Templates will be copied by the plugin to the UM Template folder for emails when plugin is active.
