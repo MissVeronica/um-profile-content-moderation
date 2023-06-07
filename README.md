@@ -1,5 +1,5 @@
 # UM Profile Content Moderation
-Extension to Ultimate Member for Profile Content Moderation. User Profile edit will set the User into Admin Review which the Admin can releaee and accept the Profile updates. Discussions about unwanted user profile updates must be via standard emails or the Admin uses the Edit capability for the User Profile or maybe a Chat Plugin.
+Extension to Ultimate Member for Profile Content Moderation. User Profile edit will set the User into Admin Review which the Admin can releaee and accept the Profile updates. 
 
 ## UM Settings
 UM Settings -> General -> Users
@@ -13,14 +13,20 @@ UM Settings -> General -> Users
 ## UM Admin Menu
 1. Additional UM sub-menu "Content Moderation" for listing of all Users waiting for profile content moderation.
 2. Available UM Bulk User Actions: Approve Profile Update, Deny Profile Update, Deactivate
+3. "Review Profile Content Moderation" Modal with before/after content of updated fields with a dropdown "Moderation" link
 
 ## UM Email Templates
-Create new custom email templates or use existing UM email templates.
+1. Template for the "Content Moderation - User Pending Notification"
+2. Template for the "Content Moderation - User Accept Notification"
+3. Template for the "Content Moderation - User Denial Notification"
+4. Template for the "Content Moderation - User Accept Notification"
 
 https://docs.ultimatemember.com/article/1515-how-to-add-and-use-custom-email-templates
 
 ## Updates
 1. Version 1.1.0 Addition of User Denial Notification Email and changed dropdown menu in UM sub-menu "Content Moderation".
+2. Version 2.0.0 Four new email templates. Backend users modal with before/after content of updated fields.
 
 ## Installation
 Download the zip file and install as a WP Plugin, activate the plugin.
+Email Templates will be copied to UM Template for emails when plugin is active.
