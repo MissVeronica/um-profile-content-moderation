@@ -19,7 +19,7 @@ UM Settings -> General -> Users
 1. Template for the "Content Moderation - User Pending Notification"
 2. Template for the "Content Moderation - User Accept Notification"
 3. Template for the "Content Moderation - User Denial Notification"
-4. Template for the "Content Moderation - User Accept Notification"
+4. Template for the "Content Moderation - Admin Notification"
 
 ## Updates
 1. Version 1.1.0 Addition of User Denial Notification Email and changed dropdown menu in UM sub-menu "Content Moderation".
