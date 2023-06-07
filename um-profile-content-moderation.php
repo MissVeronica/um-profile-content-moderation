@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Profile Content Moderation
  * Description:     Extension to Ultimate Member for Profile Content Moderation.
- * Version:         1.1.0
+ * Version:         2.0.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v3 or later
@@ -10,7 +10,7 @@
  * Author URI:      https://github.com/MissVeronica
  * Text Domain:     ultimate-member
  * Domain Path:     /languages
- * UM version:      2.6.0
+ * UM version:      2.6.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -20,20 +20,30 @@ class UM_Profile_Content_Moderation {
 
     public $profile_forms = array();
     public $notification_emails = array();
+    public $send_email = false;
+    public $slug = array();
 
     function __construct() {
 
         if ( is_admin()) {
 
-            add_filter( 'um_settings_structure', array( $this, 'um_settings_structure_content_moderation' ), 10, 1 );
-            add_action(	'um_extend_admin_menu',  array( $this, 'um_extend_admin_menu_content_moderation' ), 10 );
-            add_filter( 'pre_user_query',        array( $this, 'filter_users_content_moderation' ), 99 );
+            add_filter( 'um_settings_structure',  array( $this, 'um_settings_structure_content_moderation' ), 10, 1 );
+            add_action(	'um_extend_admin_menu',   array( $this, 'um_extend_admin_menu_content_moderation' ), 10 );
+            add_filter( 'pre_user_query',         array( $this, 'filter_users_content_moderation' ), 99 );
+            add_filter( 'um_email_notifications', array( $this, 'um_email_notification_profile_content_moderation' ), 99 );
 
             add_action( "um_admin_custom_hook_um_deny_profile_update", array( $this, 'um_deny_profile_update_content_moderation' ), 10, 1 );
             add_filter( 'um_disable_email_notification_sending',       array( $this, 'um_disable_email_notification_content_moderation' ), 10, 4 );
             add_filter( 'um_admin_bulk_user_actions_hook',             array( $this, 'um_admin_bulk_user_actions_content_moderation' ), 10, 1 );
+            add_filter( 'um_admin_user_row_actions',                   array( $this, 'um_admin_user_row_actions_content_moderation' ), 10, 2 );
 
-            $um_profile_forms = get_posts( array( 	'meta_key'    => '_um_mode',
+            add_action( 'um_admin_ajax_modal_content__hook_content_moderation_review_update', array( $this, 'content_moderation_review_update_ajax_modal' ));
+
+            if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) {
+                add_action( 'admin_init', array( $this, 'replace_standard_action_content_moderation' ), 10 ); 
+            }
+
+            $um_profile_forms = get_posts( array(   'meta_key'    => '_um_mode',
                                                     'meta_value'  => 'profile',
                                                     'numberposts' => -1,
                                                     'post_type'   => 'um_form',
@@ -50,12 +60,142 @@ class UM_Profile_Content_Moderation {
             }
         }
 
+        add_action( 'um_user_pre_updating_profile',   array( $this, 'um_user_pre_updating_profile_save_before_after' ), 10, 2 );
         add_action( 'um_user_after_updating_profile', array( $this, 'um_user_after_updating_profile_set_pending' ), 10, 3 );
+    }
+
+    public function copy_email_notifications_content_moderation() {
+
+        define( 'Content_Moderation_Path', plugin_dir_path( __FILE__ ) );
+
+        foreach( $this->slug as $slug ) {
+
+            $located = UM()->mail()->locate_template( $slug );
+            if ( empty( $located )) {
+                $located = wp_normalize_path( STYLESHEETPATH . '/ultimate-member/email/' . $slug . '.php' );
+            }
+
+            clearstatcache();
+            if ( ! file_exists( $located ) ) {
+
+                wp_mkdir_p( dirname( $located ) );
+
+                $email_source = file_get_contents( Content_Moderation_Path . $slug . '.php' );
+                file_put_contents( $located, $email_source );
+            }
+        }
+    }
+
+    public function replace_standard_action_content_moderation() {
+
+        remove_action( 'admin_footer', array( UM()->classes['admin_metabox'], 'load_modal_content' ), 9 );
+        add_action(    'admin_footer', array( $this, 'load_modal_content_moderation' ), 9 );
+    }
+
+    public function content_moderation_review_update_ajax_modal() {
+
+        $user_id = sanitize_text_field( $_POST['arg1'] );
+
+        echo '<div class="um-admin-infobox">';
+
+        if ( current_user_can( 'administrator' ) && um_can_view_profile( $user_id )) {
+
+            um_fetch_user( $user_id );
+
+            echo '<p><label>Profile Update submitted ' . 
+                    date( 'Y-m-d H:i:s ', um_user( 'um_content_moderation' )) .
+                    'by User ' . um_user( 'user_login' ) . 
+                  '</label></p>';
+
+            $diff_updates = maybe_unserialize( um_user( 'um_diff_updates' ));
+
+            $old = __( 'Old:',  'ultimate-member' );
+            $new = __( 'New:',  'ultimate-member' );
+
+            $output = array();
+
+            foreach( $diff_updates as $meta_key => $meta_value ) {
+
+                $meta_value['old'] = maybe_unserialize( $meta_value['old'] );
+                $meta_value['new'] = maybe_unserialize( $meta_value['new'] );
+
+                if ( is_array( $meta_value['old'] )) {
+                    $meta_value['old'] = implode( ',', $meta_value['old'] );
+                }
+                if ( is_array( $meta_value['new'] )) {
+                    $meta_value['new'] = implode( ',', $meta_value['new'] );
+                }
+
+                if ( empty( $meta_value['old'] )) $meta_value['old'] = '(empty)';
+                if ( empty( $meta_value['new'] )) $meta_value['new'] = '(empty)';
+
+                if ( mb_strtolower( $meta_value['old']) != mb_strtolower( $meta_value['new'])) {
+
+                    $field = UM()->builtin()->get_a_field( $meta_key );
+                    $title = isset( $field['title'] ) ? esc_attr( $field['title']) : esc_attr( $field['label']);
+
+                    $output[] = "<p><label>{$title}</label>
+                                    <span><label>{$old}</label>" . esc_attr( $meta_value['old']) . "<br />
+                                    <label>{$new}</label>" . esc_attr( $meta_value['new']) .
+                                    "</span></p>";
+                }
+            }
+
+            if ( count( $output ) > 0 ) {
+                sort( $output );
+                echo implode( '', $output );
+
+            } else {
+
+                echo '<p><label>' . __( 'No updates found', 'ultimate-member' ) . '</label></p>';
+                echo '<p><label>' . __( 'Image/File updates are not logged at the moment.', 'ultimate-member' ) . '</label></p>';
+            }
+
+            um_reset_user();
+
+        } else {
+
+            echo '<p><label>' . __( 'No access', 'ultimate-member' ) . '</label></p>';
+        }
+
+        echo '</div>';
+    }
+
+    public function load_modal_content_moderation() {
+
+        ?><div id="UM_preview_profile_update" style="display:none">
+            <div class="um-admin-modal-head">
+                <h3><?php _e( "Review Profile Content Moderation", "ultimate-member" ); ?></h3>
+            </div>
+            <div class="um-admin-modal-body"></div>
+            <div class="um-admin-modal-foot"></div>
+        </div>
+
+        <div id="UM_preview_registration" style="display:none">
+            <div class="um-admin-modal-head">
+                <h3><?php _e( 'Review Registration Details', 'ultimate-member' ); ?></h3>
+            </div>
+            <div class="um-admin-modal-body"></div>
+            <div class="um-admin-modal-foot"></div>
+        </div><?php
+    }
+
+    public function um_admin_user_row_actions_content_moderation( $actions, $user_id ) {
+        
+        if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) { 
+
+            $actions['view_info_update'] = '<a href="javascript:void(0);" data-modal="UM_preview_profile_update" 
+                                            data-modal-size="smaller" data-dynamic-content="content_moderation_review_update" 
+                                            data-arg1="' . esc_attr( $user_id ) . '" data-arg2="profile_updates">' . 
+                                            __( 'Moderation', 'ultimate-member' ) .  '</a>';
+        }
+
+        return $actions;
     }
 
     public function um_admin_bulk_user_actions_content_moderation( $actions ) {
 
-        if( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) {
+        if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) {
 
             $actions = array();
 
@@ -65,7 +205,21 @@ class UM_Profile_Content_Moderation {
         }
 
         return $actions;
-    } 
+    }
+
+    public function content_moderation_action() {
+
+        $um_content_moderation_forms = array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_forms' ));
+        $form_id = sanitize_text_field( $_POST['form_id'] );
+
+        if ( in_array( $form_id, $um_content_moderation_forms )) {
+
+            if ( in_array( UM()->user()->get_role(), array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_roles' )))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public function um_deny_profile_update_content_moderation( $uid ) {
 
@@ -83,9 +237,10 @@ class UM_Profile_Content_Moderation {
                 um_fetch_user( $user->ID );
                 $um_content_moderation = um_user( 'um_content_moderation' );
 
-                if ( isset( $um_content_moderation ) && (int)$um_content_moderation > 1000 ) {
+                if ( isset( $um_content_moderation ) && (int)$um_content_moderation > 0 ) {
 
                     update_user_meta( $user->ID, 'um_content_moderation', 0 );
+                    update_user_meta( $user->ID, 'um_diff_updates', null );
                     UM()->user()->remove_cache( $user->ID );
                     um_fetch_user( $user->ID );
 
@@ -137,7 +292,7 @@ class UM_Profile_Content_Moderation {
                                                                         SELECT {$wpdb->usermeta}.user_id FROM $wpdb->usermeta
                                                                         WHERE {$wpdb->usermeta}.meta_key = 'um_content_moderation'
                                                                         AND {$wpdb->usermeta}.meta_value > '1000')",
-                                                                      $filter_query->query_where );
+                                                            $filter_query->query_where );
             }
         }
 
@@ -150,25 +305,44 @@ class UM_Profile_Content_Moderation {
 
         add_submenu_page( 'ultimatemember', __( 'Content Moderation', 'ultimate-member' ), 
                                             __( 'Content Moderation', 'ultimate-member' ), 
-                                                'manage_options', $url , '' );			
+                                                'manage_options', $url , '' );
+                                                
+        $this->copy_email_notifications_content_moderation();
+    }
+
+    public function um_user_pre_updating_profile_save_before_after( $to_update, $user_id ) {
+
+        if ( $this->content_moderation_action() ) {
+
+            $diff_updates = maybe_unserialize( um_user( 'um_diff_updates' ));
+            if ( empty( $diff_updates )) {
+                $diff_updates = array();
+            }
+
+            foreach( $to_update as $meta_key => $meta_value ) {
+                if ( empty( $diff_updates[$meta_key]['old'] )) {
+                    $diff_updates[$meta_key]['old'] = um_user( $meta_key );
+                }
+                $diff_updates[$meta_key]['new'] = $meta_value;
+            }
+
+            update_user_meta( $user_id, 'um_diff_updates', $diff_updates );
+
+            $um_content_moderation = um_user( 'um_content_moderation' );
+            if ( empty( $um_content_moderation ) || (int)$um_content_moderation == 0 ) {
+                $this->send_email = true;
+                update_user_meta( $user_id, 'um_content_moderation', current_time( 'timestamp' ) );
+            }
+        }
     }
 
     public function um_user_after_updating_profile_set_pending( $to_update, $user_id, $args ) {
 
-        $um_content_moderation_forms = UM()->options()->get( 'um_content_moderation_forms' );
+        if ( $this->send_email ) {
 
-        if ( in_array( $args['form_id'], $um_content_moderation_forms )) {
-
-            if ( in_array( UM()->user()->get_role(), UM()->options()->get( 'um_content_moderation_roles' ))) {
-
-                UM()->user()->set_status( 'awaiting_admin_review' );
-                UM()->mail()->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_pending_user_email' ) );
-                UM()->mail()->send( get_bloginfo( 'admin_email' ), UM()->options()->get( 'um_content_moderation_admin_email' ), array( 'admin' => true ) );
-
-                update_user_meta( $user_id, 'um_content_moderation', time() );
-                UM()->user()->remove_cache( $user_id );
-                um_fetch_user( $user_id );
-            }
+            UM()->user()->set_status( 'awaiting_admin_review' );
+            UM()->mail()->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_pending_user_email' ) );
+            UM()->mail()->send( get_bloginfo( 'admin_email' ), UM()->options()->get( 'um_content_moderation_admin_email' ), array( 'admin' => true ) );
         }
     }
 
@@ -231,6 +405,65 @@ class UM_Profile_Content_Moderation {
             );
 
         return $settings_structure;
+    }
+
+    public function um_email_notification_profile_content_moderation( $emails ) {
+
+        $custom_emails = array(	'content_moderation_pending_user_email' => array(
+                                        'key'            => 'content_moderation_pending_user_email',
+                                        'title'          => __( 'Content Moderation - User Pending Notification', 'ultimate-member' ),
+                                        'description'    => __( 'User Pending Notification Email template', 'ultimate-member' ),
+                                        'recipient'      => 'user',
+                                        'default_active' => true,
+                                        'subject'        => '[{site_name}] Profile review pending',
+                                        'body'           => '',
+                                ),
+
+                                'content_moderation_accept_user_email' => array(
+                                        'key'            => 'content_moderation_accept_user_email',
+                                        'title'          => __( 'Content Moderation - User Accept Notification', 'ultimate-member' ),
+                                        'description'    => __( 'User Accepted Notification Email template', 'ultimate-member' ),
+                                        'recipient'      => 'user',
+                                        'default_active' => true,
+                                        'subject'        => '[{site_name}] Profile is accepted',
+                                        'body'           => '',
+                                ),
+
+                                'content_moderation_denial_user_email' => array(
+                                        'key'            => 'content_moderation_denial_user_email',
+                                        'title'          => __( 'Content Moderation - User Denial Notification', 'ultimate-member' ),
+                                        'description'    => __( 'User Denial Notification Email template', 'ultimate-member' ),
+                                        'recipient'      => 'user',
+                                        'default_active' => true,
+                                        'subject'        => '[{site_name}] Profile is denied',
+                                        'body'           => '',
+                                ),
+
+                                'content_moderation_pending_admin_email' => array(
+                                        'key'            => 'content_moderation_pending_admin_email',
+                                        'title'          => __( 'Content Moderation - Admin Pending Notification', 'ultimate-member' ),
+                                        'description'    => __( 'Admin Pending Notification Email template', 'ultimate-member' ),
+                                        'recipient'      => 'admin',
+                                        'default_active' => true,
+                                        'subject'        => '[{site_name}] Profile is updated',
+                                        'body'           => '',
+                                ),
+                            );
+
+        foreach ( $custom_emails as $slug => $custom_email ) {
+
+            if ( ! array_key_exists( $slug . '_on', UM()->options()->options ) ) {
+
+                UM()->options()->options[ $slug . '_on' ]  = empty( $custom_email['default_active'] ) ? 0 : 1;
+                UM()->options()->options[ $slug . '_sub' ] = $custom_email['subject'];
+            }
+
+            $this->slug[] = $slug;
+
+            $emails[ $slug ] = $custom_email;
+        }
+
+        return $emails;
     }
 
 }
