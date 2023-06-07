@@ -21,8 +21,6 @@ UM Settings -> General -> Users
 3. Template for the "Content Moderation - User Denial Notification"
 4. Template for the "Content Moderation - User Accept Notification"
 
-https://docs.ultimatemember.com/article/1515-how-to-add-and-use-custom-email-templates
-
 ## Updates
 1. Version 1.1.0 Addition of User Denial Notification Email and changed dropdown menu in UM sub-menu "Content Moderation".
 2. Version 2.0.0 Four new email templates. Backend users modal with before/after content of updated fields.
