@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Profile Content Moderation
  * Description:     Extension to Ultimate Member for Profile Content Moderation.
- * Version:         2.0.0
+ * Version:         2.1.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v3 or later
@@ -10,7 +10,7 @@
  * Author URI:      https://github.com/MissVeronica
  * Text Domain:     ultimate-member
  * Domain Path:     /languages
- * UM version:      2.6.0
+ * UM version:      2.6.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -102,10 +102,12 @@ class UM_Profile_Content_Moderation {
 
             um_fetch_user( $user_id );
 
-            echo '<p><label>Profile Update submitted ' . 
-                    date( 'Y-m-d H:i:s ', um_user( 'um_content_moderation' )) .
-                    'by User ' . um_user( 'user_login' ) . 
-                  '</label></p>';
+            echo '<p><label>' . sprintf( __( 'Profile Update submitted %s by User %s', 'ultimate-member' ), date( 'Y-m-d H:i:s', um_user( 'um_content_moderation' )), um_user( 'user_login' )) . '</label></p>';
+
+            $um_denial_profile_updates = um_user( 'um_denial_profile_updates' );
+            if ( ! empty( $um_denial_profile_updates ) && (int)$um_denial_profile_updates > 0 ) {
+                echo '<p><label>' . sprintf( __( 'Profile Update Denial sent %s', 'ultimate-member' ), date( 'Y-m-d H:i:s', $um_denial_profile_updates )) . '</label></p>';
+            }
 
             $diff_updates = maybe_unserialize( um_user( 'um_diff_updates' ));
 
@@ -126,8 +128,8 @@ class UM_Profile_Content_Moderation {
                     $meta_value['new'] = implode( ',', $meta_value['new'] );
                 }
 
-                if ( empty( $meta_value['old'] )) $meta_value['old'] = '(empty)';
-                if ( empty( $meta_value['new'] )) $meta_value['new'] = '(empty)';
+                if ( empty( $meta_value['old'] )) $meta_value['old'] = __( '(empty)', 'ultimate-member' );
+                if ( empty( $meta_value['new'] )) $meta_value['new'] = __( '(empty)', 'ultimate-member' );
 
                 if ( mb_strtolower( $meta_value['old']) != mb_strtolower( $meta_value['new'])) {
 
@@ -181,7 +183,7 @@ class UM_Profile_Content_Moderation {
     }
 
     public function um_admin_user_row_actions_content_moderation( $actions, $user_id ) {
-        
+
         if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) { 
 
             $actions['view_info_update'] = '<a href="javascript:void(0);" data-modal="UM_preview_profile_update" 
@@ -218,13 +220,18 @@ class UM_Profile_Content_Moderation {
                 return true;
             }
         }
+
         return false;
     }
 
-    public function um_deny_profile_update_content_moderation( $uid ) {
+    public function um_deny_profile_update_content_moderation( $user_id ) {
 
-        um_fetch_user( $uid );
+        um_fetch_user( $user_id );
         $this->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_denial_user_email' ) );
+
+        update_user_meta( $user_id, 'um_denial_profile_updates', current_time( 'timestamp' ) );
+        UM()->user()->remove_cache( $user_id );
+        um_fetch_user( $user_id );
     }
 
     public function um_disable_email_notification_content_moderation( $false, $email, $template, $args ) {
@@ -241,6 +248,11 @@ class UM_Profile_Content_Moderation {
 
                     update_user_meta( $user->ID, 'um_content_moderation', 0 );
                     update_user_meta( $user->ID, 'um_diff_updates', null );
+
+                    if ( ! empty( um_user( 'um_denial_profile_updates' )) && (int)um_user( 'um_denial_profile_updates' ) > 0 ) {
+                        update_user_meta( $user->ID, 'um_denial_profile_updates', 0 );
+                    }
+
                     UM()->user()->remove_cache( $user->ID );
                     um_fetch_user( $user->ID );
 
@@ -320,6 +332,7 @@ class UM_Profile_Content_Moderation {
             }
 
             foreach( $to_update as $meta_key => $meta_value ) {
+
                 if ( empty( $diff_updates[$meta_key]['old'] )) {
                     $diff_updates[$meta_key]['old'] = um_user( $meta_key );
                 }
