@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Profile Content Moderation
  * Description:     Extension to Ultimate Member for Profile Content Moderation.
- * Version:         2.1.0
+ * Version:         2.2.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v3 or later
@@ -27,10 +27,16 @@ class UM_Profile_Content_Moderation {
 
         if ( is_admin()) {
 
-            add_filter( 'um_settings_structure',  array( $this, 'um_settings_structure_content_moderation' ), 10, 1 );
-            add_action(	'um_extend_admin_menu',   array( $this, 'um_extend_admin_menu_content_moderation' ), 10 );
-            add_filter( 'pre_user_query',         array( $this, 'filter_users_content_moderation' ), 99 );
-            add_filter( 'um_email_notifications', array( $this, 'um_email_notification_profile_content_moderation' ), 99 );
+            remove_filter( 'manage_users_custom_column', array( &UM()->classes['admin_columns'], 'manage_users_custom_column' ), 10, 3 );
+            add_filter( 'manage_users_custom_column',    array( $this, 'manage_users_custom_column_content_moderation' ), 10, 3 );
+
+            add_filter( 'manage_users_columns',          array( $this, 'manage_users_columns_content_moderation' ) );
+            add_filter( 'um_admin_views_users',          array( $this, 'um_admin_views_users_content_moderation' ), 10, 1 );
+
+            add_filter( 'um_settings_structure',         array( $this, 'um_settings_structure_content_moderation' ), 10, 1 );
+            add_action(	'um_extend_admin_menu',          array( $this, 'um_extend_admin_menu_content_moderation' ), 10 );
+            add_filter( 'pre_user_query',                array( $this, 'filter_users_content_moderation' ), 99 );
+            add_filter( 'um_email_notifications',        array( $this, 'um_email_notification_profile_content_moderation' ), 99 );
 
             add_action( "um_admin_custom_hook_um_deny_profile_update", array( $this, 'um_deny_profile_update_content_moderation' ), 10, 1 );
             add_filter( 'um_disable_email_notification_sending',       array( $this, 'um_disable_email_notification_content_moderation' ), 10, 4 );
@@ -64,6 +70,67 @@ class UM_Profile_Content_Moderation {
         add_action( 'um_user_after_updating_profile', array( $this, 'um_user_after_updating_profile_set_pending' ), 10, 3 );
     }
 
+    public function um_admin_views_users_content_moderation( $views ) {
+
+        global $wpdb;
+
+        $moderation_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key = 'um_content_moderation' AND meta_value > '0' " );
+
+        if ( $moderation_count > 0 ) {
+            $pending = explode( ')', ( explode( '(', $views['awaiting_admin_review'] ) [1] )) [0];
+            $views['awaiting_admin_review'] = str_replace( '(' . $pending . ')', '(' . ( (int)$pending - (int)$moderation_count ) . ')', $views['awaiting_admin_review'] );
+        }
+
+        $views['moderation'] = '<a href="' . esc_url( admin_url( 'users.php' ) . '?content_moderation=awaiting_profile_review' ) . '">' . 
+                                __( 'Content Moderation', 'ultimate-member' ) . ' <span class="count">(' . $moderation_count . ')</span></a>';
+
+        return $views;
+    }
+
+    public function manage_users_columns_content_moderation( $columns ) {
+
+        if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) { 
+
+            $columns['content_moderation'] = __( 'Update/Denial', 'ultimate-member' );
+        }
+
+        return $columns;
+    }
+
+    public function manage_users_custom_column_content_moderation( $value, $column_name, $user_id ) {
+
+        if ( $column_name == 'account_status' ) {
+
+            um_fetch_user( $user_id );
+            $value = um_user( 'account_status_name' );
+
+            if ( (int)um_user( 'um_content_moderation' ) > 1000 ) {
+                $value = __( 'Content Moderation', 'ultimate-member' );
+            }
+
+            um_reset_user();
+        }
+
+        if ( $column_name == 'content_moderation' ) {
+
+            um_fetch_user( $user_id );
+
+            $um_content_moderation = um_user( 'um_content_moderation' );
+            if ( (int)$um_content_moderation > 1000 ) {
+                $value .= date( 'Y-m-d H:i:s', $um_content_moderation );
+            }
+
+            $um_denial_profile_updates = um_user( 'um_denial_profile_updates' );
+            if ( ! empty( $um_denial_profile_updates ) && (int)$um_denial_profile_updates > 0 ) {
+                $value .= '<br />' . date( 'Y-m-d H:i:s', $um_denial_profile_updates );
+            }
+
+            um_reset_user();
+        }
+
+        return $value;
+    }
+
     public function copy_email_notifications_content_moderation() {
 
         define( 'Content_Moderation_Path', plugin_dir_path( __FILE__ ) );
@@ -90,6 +157,7 @@ class UM_Profile_Content_Moderation {
 
         remove_action( 'admin_footer', array( UM()->classes['admin_metabox'], 'load_modal_content' ), 9 );
         add_action(    'admin_footer', array( $this, 'load_modal_content_moderation' ), 9 );
+
     }
 
     public function content_moderation_review_update_ajax_modal() {
@@ -232,6 +300,10 @@ class UM_Profile_Content_Moderation {
         update_user_meta( $user_id, 'um_denial_profile_updates', current_time( 'timestamp' ) );
         UM()->user()->remove_cache( $user_id );
         um_fetch_user( $user_id );
+
+        $uri = add_query_arg( 'content_moderation', 'awaiting_profile_review', admin_url( 'users.php' ) );
+        wp_redirect( $uri );
+        exit;
     }
 
     public function um_disable_email_notification_content_moderation( $false, $email, $template, $args ) {
@@ -257,7 +329,10 @@ class UM_Profile_Content_Moderation {
                     um_fetch_user( $user->ID );
 
                     $this->send( $email, UM()->options()->get( 'um_content_moderation_accept_user_email' ) );
-                    return true;
+
+                    $uri = add_query_arg( 'content_moderation', 'awaiting_profile_review', admin_url( 'users.php' ) );
+                    wp_redirect( $uri );
+                    exit;
                 }
             }
         }
