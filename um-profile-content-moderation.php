@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Profile Content Moderation
  * Description:     Extension to Ultimate Member for Profile Content Moderation.
- * Version:         2.2.1
+ * Version:         2.2.2
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v3 or later
@@ -75,12 +75,6 @@ class UM_Profile_Content_Moderation {
         global $wpdb;
 
         $moderation_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key = 'um_content_moderation' AND meta_value > '0' " );
-
-        if ( $moderation_count > 0 ) {
-            $pending = explode( ')', ( explode( '(', $views['awaiting_admin_review'] ) [1] )) [0];
-            $views['awaiting_admin_review'] = str_replace( '(' . $pending . ')', '(' . ( (int)$pending - (int)$moderation_count ) . ')', $views['awaiting_admin_review'] );
-        }
-
         $views['moderation'] = '<a href="' . esc_url( admin_url( 'users.php' ) . '?content_moderation=awaiting_profile_review' ) . '">' . 
                                 __( 'Content Moderation', 'ultimate-member' ) . ' <span class="count">(' . $moderation_count . ')</span></a>';
 
