@@ -27,6 +27,7 @@ UM Settings -> General -> Users
 3. Version 2.1.0 Modal notice of sent denial email and timestamp.
 4. Version 2.2.0 Improved User Interface. 
 5. Version 2.2.1 Setting status approved after accept of updates.
+6. Version 2.2.2 Review pending number not altered in the top bar
 
 ## Installation
 1. Download the zip file and install as a WP Plugin, activate the plugin.
