@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Profile Content Moderation
  * Description:     Extension to Ultimate Member for Profile Content Moderation.
- * Version:         2.2.0
+ * Version:         2.2.1
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v3 or later
@@ -325,11 +325,12 @@ class UM_Profile_Content_Moderation {
                         update_user_meta( $user->ID, 'um_denial_profile_updates', 0 );
                     }
 
+                    update_user_meta( $user->ID, 'account_status', 'approved' );
                     UM()->user()->remove_cache( $user->ID );
                     um_fetch_user( $user->ID );
 
-                    $this->send( $email, UM()->options()->get( 'um_content_moderation_accept_user_email' ) );
-
+                    $this->send( $email, UM()->options()->get( 'um_content_moderation_accept_user_email' ) );                    
+                    
                     $uri = add_query_arg( 'content_moderation', 'awaiting_profile_review', admin_url( 'users.php' ) );
                     wp_redirect( $uri );
                     exit;
@@ -557,3 +558,4 @@ class UM_Profile_Content_Moderation {
 }
 
 new UM_Profile_Content_Moderation();
+
