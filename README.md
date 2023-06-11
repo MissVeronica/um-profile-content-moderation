@@ -28,6 +28,7 @@ UM Settings -> General -> Users
 4. Version 2.2.0 Improved User Interface. 
 5. Version 2.2.1 Setting status approved after accept of updates.
 6. Version 2.2.2 Review pending number not altered in the top bar
+7. Version 2.2.3 Update of top bar
 
 ## Installation
 1. Download the zip file and install as a WP Plugin, activate the plugin.
