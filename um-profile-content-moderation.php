@@ -1,16 +1,17 @@
 <?php
 /**
- * Plugin Name:     Ultimate Member - Profile Content Moderation
- * Description:     Extension to Ultimate Member for Profile Content Moderation.
- * Version:         2.2.3
- * Requires PHP:    7.4
- * Author:          Miss Veronica
- * License:         GPL v3 or later
- * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
- * Author URI:      https://github.com/MissVeronica
- * Text Domain:     ultimate-member
- * Domain Path:     /languages
- * UM version:      2.6.3
+ * Plugin Name:         Ultimate Member - Profile Content Moderation
+ * Description:         Extension to Ultimate Member for Profile Content Moderation.
+ * Version:             3.0.0
+ * Requires PHP:        7.4
+ * Author:              Miss Veronica
+ * License:             GPL v3 or later
+ * License URI:         https://www.gnu.org/licenses/gpl-2.0.html
+ * Author URI:          https://github.com/MissVeronica
+ * Text Domain:         ultimate-member
+ * Domain Path:         /languages
+ * UM version:          2.6.3
+ * Source computeDiff:  https://stackoverflow.com/questions/321294/highlight-the-difference-between-two-strings-in-php
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -18,10 +19,12 @@ if ( ! class_exists( 'UM' ) ) return;
 
 class UM_Profile_Content_Moderation {
 
-    public $profile_forms = array();
-    public $notification_emails = array();
+    public $profile_forms        = array();
+    public $notification_emails  = array();
+    public $slug                 = array();
+    public $update_field_types   = array();
+    public $not_update_user_keys = array( 'role', 'pass', 'password' );
     public $send_email = false;
-    public $slug = array();
 
     function __construct() {
 
@@ -37,17 +40,26 @@ class UM_Profile_Content_Moderation {
             add_action(	'um_extend_admin_menu',          array( $this, 'um_extend_admin_menu_content_moderation' ), 10 );
             add_filter( 'pre_user_query',                array( $this, 'filter_users_content_moderation' ), 99 );
             add_filter( 'um_email_notifications',        array( $this, 'um_email_notification_profile_content_moderation' ), 99 );
+            add_filter( 'manage_users_sortable_columns', array( $this, 'register_sortable_columns_custom' ), 10, 1 );
+            add_action( 'pre_get_users',                 array( $this, 'pre_get_users_sort_columns_custom' ));
 
             add_action( "um_admin_custom_hook_um_deny_profile_update", array( $this, 'um_deny_profile_update_content_moderation' ), 10, 1 );
             add_filter( 'um_disable_email_notification_sending',       array( $this, 'um_disable_email_notification_content_moderation' ), 10, 4 );
             add_filter( 'um_admin_bulk_user_actions_hook',             array( $this, 'um_admin_bulk_user_actions_content_moderation' ), 10, 1 );
             add_filter( 'um_admin_user_row_actions',                   array( $this, 'um_admin_user_row_actions_content_moderation' ), 10, 2 );
+            add_action( 'load-toplevel_page_ultimatemember',           array( $this, 'load_toplevel_page_content_moderation' ) );
 
             add_action( 'um_admin_ajax_modal_content__hook_content_moderation_review_update', array( $this, 'content_moderation_review_update_ajax_modal' ));
+            add_action( "um_admin_custom_hook_um_rollback_profile_update",                    array( $this, 'um_rollback_profile_update_content_moderation' ), 10, 1 );
 
-            if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) {
+            if ( isset( $_REQUEST['content_moderation'] ) && sanitize_key( $_REQUEST['content_moderation'] ) === 'awaiting_profile_review' ) {
                 add_action( 'admin_init', array( $this, 'replace_standard_action_content_moderation' ), 10 ); 
             }
+
+            define( 'Content_Moderation_Path', plugin_dir_path( __FILE__ ) );
+            define( 'CM_UNMODIFIED',  0 );
+            define( 'CM_DELETED',    -1 );
+            define( 'CM_INSERTED',    1 );
 
             $um_profile_forms = get_posts( array(   'meta_key'    => '_um_mode',
                                                     'meta_value'  => 'profile',
@@ -68,13 +80,70 @@ class UM_Profile_Content_Moderation {
 
         add_action( 'um_user_pre_updating_profile',   array( $this, 'um_user_pre_updating_profile_save_before_after' ), 10, 2 );
         add_action( 'um_user_after_updating_profile', array( $this, 'um_user_after_updating_profile_set_pending' ), 10, 3 );
+        add_action( 'um_user_edit_profile',           array( $this, 'um_user_edit_profile_content_moderation' ), 10, 1 );
+    }
+
+    public function load_toplevel_page_content_moderation() {
+
+        add_meta_box( 'um-metaboxes-sidebox-20', __( 'Content Moderation', 'ultimate-member' ), array( $this, 'toplevel_page_content_moderation' ), 'toplevel_page_ultimatemember', 'side', 'core' );
+    }
+
+    public function count_content_values( $meta_key ) {
+
+        global $wpdb;
+
+        return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key = '{$meta_key}' AND meta_value > '0' " );
+    }
+
+    public function format_users( $counter ) {
+
+        if ( $counter == 0 ) {
+            $count_users = __( 'No users', 'ultimate-member' );
+        } else {
+            $count_users = ( $counter > 1 ) ? sprintf( __( '%d users', 'ultimate-member' ), $counter ) : __( 'One user', 'ultimate-member' );
+        }
+
+        return $count_users;
+    }
+
+    function toplevel_page_content_moderation() {
+
+        $moderation_count = $this->format_users( $this->count_content_values( 'um_content_moderation' ) );
+        $denied_count     = $this->format_users( $this->count_content_values( 'um_denial_profile_updates' ) );
+        $rollback_count   = $this->format_users( $this->count_content_values( 'um_rollback_profile_updates' ) );
+?>
+        <div>
+            <p><?php echo sprintf( __( '%s waiting for profile update approval.', 'ultimate-member' ), $moderation_count ); ?></p>
+            <p><?php echo sprintf( __( '%s being denied their profile update.', 'ultimate-member' ), $denied_count ); ?></p>
+            <p><?php echo sprintf( __( '%s with rollbacks.', 'ultimate-member' ), $rollback_count ); ?></p>
+        </div>
+<?php
+    }
+
+    public function um_user_edit_profile_content_moderation( $args ) {
+
+        $custom_fields = maybe_unserialize( $args['custom_fields'] );
+        foreach( $custom_fields as $meta_key => $value ) {
+            if ( is_array( $value ) && isset( $value['type'] )) {
+                $this->update_field_types[$meta_key] = $value['type'];
+            }
+        }
+        $this->update_field_types['description'] = 'textarea';
+    }
+
+    public function redirect_to_content_moderation( $user_id ) {
+
+        UM()->user()->remove_cache( $user_id );
+        um_fetch_user( $user_id );
+
+        $uri = add_query_arg( 'content_moderation', 'awaiting_profile_review', admin_url( 'users.php' ) );
+        wp_redirect( $uri );
+        exit;
     }
 
     public function um_admin_views_users_content_moderation( $views ) {
 
-        global $wpdb;
-
-        $moderation_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key = 'um_content_moderation' AND meta_value > '0' " );
+        $moderation_count = $this->count_content_values( 'um_content_moderation' );
         
         if ( isset( $_REQUEST['content_moderation'] ) && sanitize_key( $_REQUEST['content_moderation'] ) === 'awaiting_profile_review' ) {
             $current = 'class="current"';
@@ -91,12 +160,27 @@ class UM_Profile_Content_Moderation {
 
     public function manage_users_columns_content_moderation( $columns ) {
 
-        if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) { 
+        if ( isset( $_REQUEST['content_moderation'] ) && sanitize_key( $_REQUEST['content_moderation'] ) === 'awaiting_profile_review' ) { 
 
             $columns['content_moderation'] = __( 'Update/Denial', 'ultimate-member' );
         }
 
         return $columns;
+    }
+
+    public function register_sortable_columns_custom( $columns ) {
+
+        $columns['content_moderation'] = 'content_moderation';
+
+        return $columns;
+    }
+
+    public function pre_get_users_sort_columns_custom( $query ) {
+
+        if ( $query->get( 'orderby' ) == 'content_moderation' ) {
+            $query->set( 'orderby',  'meta_value' );
+            $query->set( 'meta_key', 'um_content_moderation' );
+        }
     }
 
     public function manage_users_custom_column_content_moderation( $value, $column_name, $user_id ) {
@@ -134,8 +218,6 @@ class UM_Profile_Content_Moderation {
     }
 
     public function copy_email_notifications_content_moderation() {
-
-        define( 'Content_Moderation_Path', plugin_dir_path( __FILE__ ) );
 
         foreach( $this->slug as $slug ) {
 
@@ -179,37 +261,122 @@ class UM_Profile_Content_Moderation {
                 echo '<p><label>' . sprintf( __( 'Profile Update Denial sent %s', 'ultimate-member' ), date( 'Y-m-d H:i:s', $um_denial_profile_updates )) . '</label></p>';
             }
 
+            $um_rollback_profile_updates = um_user( 'um_rollback_profile_updates' );
+            if ( ! empty( $um_rollback_profile_updates ) && (int)$um_rollback_profile_updates > 0 ) {
+                echo '<p><label>' . sprintf( __( 'Last Profile Rollback of updates %s', 'ultimate-member' ), date( 'Y-m-d H:i:s', $um_rollback_profile_updates )) . '</label></p>';
+            }
+
             $diff_updates = maybe_unserialize( um_user( 'um_diff_updates' ));
 
-            $old = __( 'Old:',  'ultimate-member' );
-            $new = __( 'New:',  'ultimate-member' );
+            $old = __( 'Old:', 'ultimate-member' );
+            $new = __( 'New:', 'ultimate-member' );
 
             $output = array();
 
             foreach( $diff_updates as $meta_key => $meta_value ) {
 
-                $meta_value['old'] = maybe_unserialize( $meta_value['old'] );
-                $meta_value['new'] = maybe_unserialize( $meta_value['new'] );
+                $meta_value = $this->meta_value_any_difference( $meta_value );
 
-                if ( is_array( $meta_value['old'] )) {
-                    $meta_value['old'] = implode( ',', $meta_value['old'] );
-                }
-                if ( is_array( $meta_value['new'] )) {
-                    $meta_value['new'] = implode( ',', $meta_value['new'] );
-                }
-
-                if ( empty( $meta_value['old'] )) $meta_value['old'] = __( '(empty)', 'ultimate-member' );
-                if ( empty( $meta_value['new'] )) $meta_value['new'] = __( '(empty)', 'ultimate-member' );
-
-                if ( mb_strtolower( $meta_value['old']) != mb_strtolower( $meta_value['new'])) {
+                if ( is_array( $meta_value )) {
 
                     $field = UM()->builtin()->get_a_field( $meta_key );
-                    $title = isset( $field['title'] ) ? esc_attr( $field['title']) : esc_attr( $field['label']);
+                    $title = isset( $field['title'] ) ? esc_attr( $field['title'] ) : esc_attr( $field['label'] );
 
-                    $output[] = "<p><label>{$title}</label>
-                                    <span><label>{$old}</label>" . esc_attr( $meta_value['old']) . "<br />
-                                    <label>{$new}</label>" . esc_attr( $meta_value['new']) .
-                                    "</span></p>";
+                    if ( in_array( $meta_key, $this->not_update_user_keys )) {
+                        $title .= '<span title="' . sprintf( __( 'No rollback possible for the meta_key %s', 'ultimate-member' ), $meta_key ) . '" style="color: red;"> *</span>';
+                    }
+
+                    if ( empty( $meta_value['old'] ) || empty( $meta_value['new'] )) {
+
+                        if ( empty( $meta_value['old'] )) {
+                            $text_old = __( '(empty)', 'ultimate-member' );
+                        } else {
+                            $text_old = $meta_value['old'];
+                        }
+                        if ( empty( $meta_value['new'] )) {
+                            $text_new = __( '(empty)', 'ultimate-member' );
+                        } else {
+                            $text_new = $meta_value['new'];
+                        }
+
+                    } else {
+
+                        if ( $meta_value['type'] == 'textarea' ) {
+
+                            $meta_value['old'] = str_replace( array( "\n", "\r", "\t" ), ' ', $meta_value['old'] );
+                            $meta_value['new'] = str_replace( array( "\n", "\r", "\t" ), ' ', $meta_value['new'] );
+                        }
+
+                        $array_old = array_map( 'trim', explode( ' ', $meta_value['old'] )); 
+                        $array_new = array_map( 'trim', explode( ' ', $meta_value['new'] ));
+
+                        if ( count( $array_old ) == 1 && count( $array_new ) == 1 ) {
+
+                            $text_old = $meta_value['old'];
+                            $text_new = $meta_value['new'];
+
+                        } else {
+
+                            $diffs = $this->compute_Diff( $array_old, $array_new );
+
+                            $text_new = '';
+                            $text_old = '';
+                            $old_code = false;
+                            $new_code = false;
+                            $code = '<strong style="font-weight:900">';
+
+                            foreach( $diffs['mask'] as $key => $diff ) {
+                                switch( $diff ) {
+                                    case CM_UNMODIFIED: if ( $old_code ) {
+                                                            $text_old .= '</strong>';
+                                                            $old_code = false;
+                                                        }
+                                                        if ( $new_code ) {
+                                                            $text_new .= '</strong>';
+                                                            $new_code = false;
+                                                        }
+                                                        $text_old .= $diffs['values'][$key] . ' ';
+                                                        $text_new .= $diffs['values'][$key] . ' ';
+                                                        break;
+
+                                    case CM_DELETED:    if ( $old_code ) {
+                                                            $text_old .= $diffs['values'][$key] . ' ';
+                                                        } else {
+                                                            $text_old .= $code . $diffs['values'][$key] . ' ';
+                                                            $old_code = true;
+                                                        }
+                                                        break;
+
+                                    case CM_INSERTED:   if ( $new_code ) {
+                                                            $text_new .= $diffs['values'][$key] . ' ';
+                                                        } else {
+                                                            $text_new .= $code . $diffs['values'][$key] . ' ';
+                                                            $new_code = true;
+                                                        }
+                                                        break;
+
+                                    default:            break;
+                                }    
+                            }
+
+                            if ( $old_code ) {
+                                $text_old = rtrim( $text_old );
+                                $text_old .= '</strong>';
+                            }
+                            if ( $new_code ) {
+                                $text_new = rtrim( $text_new );
+                                $text_new .= '</strong>';
+                            }
+                            if ( $text_old == $text_new ) {
+                                $text_new = __( 'Format changes only', 'ultimate-member' );
+                            }
+
+                        }
+                    }
+
+                    $output[] =    "<p><label>{$title} - {$meta_key}</label>
+                                    <span class=\"diff-updates\"><label>{$old}</label>{$text_old}<br />
+                                    <label>{$new}</label>{$text_new}</span></p>";
                 }
             }
 
@@ -254,7 +421,7 @@ class UM_Profile_Content_Moderation {
 
     public function um_admin_user_row_actions_content_moderation( $actions, $user_id ) {
 
-        if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) { 
+        if ( isset( $_REQUEST['content_moderation'] ) && sanitize_key( $_REQUEST['content_moderation'] ) === 'awaiting_profile_review' ) { 
 
             $actions['view_info_update'] = '<a href="javascript:void(0);" data-modal="UM_preview_profile_update" 
                                             data-modal-size="smaller" data-dynamic-content="content_moderation_review_update" 
@@ -267,13 +434,19 @@ class UM_Profile_Content_Moderation {
 
     public function um_admin_bulk_user_actions_content_moderation( $actions ) {
 
-        if ( isset( $_REQUEST['content_moderation'] ) && $_REQUEST['content_moderation'] == 'awaiting_profile_review' ) {
+        if ( isset( $_REQUEST['content_moderation'] ) && sanitize_key( $_REQUEST['content_moderation'] ) === 'awaiting_profile_review' ) {
+
+            $output = ob_get_clean();
+            $output = str_replace( __( 'UM Action', 'ultimate-member' ), __( 'UM Content Moderation', 'ultimate-member' ), $output );
+            ob_start();
+            echo $output;
 
             $actions = array();
 
-            $actions['um_approve_membership']  = array( 'label' => __( 'Approve Profile Update', 'ultimate-member' ));				
-            $actions['um_deny_profile_update'] = array( 'label' => __( 'Deny Profile Update', 'ultimate-member' ));				
-            $actions['um_deactivate']          = array( 'label' => __( 'Deactivate', 'ultimate-member' ));				
+            $actions['um_approve_membership']      = array( 'label' => __( 'Approve Profile Update', 'ultimate-member' ));				
+            $actions['um_deny_profile_update']     = array( 'label' => __( 'Deny Profile Update', 'ultimate-member' ));
+            $actions['um_rollback_profile_update'] = array( 'label' => __( 'Rollback Profile Update', 'ultimate-member' ));				
+            $actions['um_deactivate']              = array( 'label' => __( 'Deactivate', 'ultimate-member' ));				
         }
 
         return $actions;
@@ -300,12 +473,127 @@ class UM_Profile_Content_Moderation {
         $this->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_denial_user_email' ) );
 
         update_user_meta( $user_id, 'um_denial_profile_updates', current_time( 'timestamp' ) );
-        UM()->user()->remove_cache( $user_id );
-        um_fetch_user( $user_id );
 
-        $uri = add_query_arg( 'content_moderation', 'awaiting_profile_review', admin_url( 'users.php' ) );
-        wp_redirect( $uri );
-        exit;
+        $this->redirect_to_content_moderation( $user_id );
+    }
+
+    public function meta_value_any_difference( $meta_value ) {
+
+        $meta_value['old'] = maybe_unserialize( $meta_value['old'] );
+        $meta_value['new'] = maybe_unserialize( $meta_value['new'] );
+
+        if ( is_array( $meta_value['old'] )) {
+            $meta_value['old'] = implode( ',', $meta_value['old'] );
+        }
+        if ( is_array( $meta_value['new'] )) {
+            $meta_value['new'] = implode( ',', $meta_value['new'] );
+        }
+
+        if ( empty( $meta_value['old'] ) && empty( $meta_value['new'] )) {
+            return false;
+        }
+
+        if ( mb_strtolower( $meta_value['old']) != mb_strtolower( $meta_value['new'])) {
+
+            return $meta_value;
+
+        } else {
+
+            return false;
+        }
+    }
+
+    public function reset_user_after_update( $user_id ) {
+
+        update_user_meta( $user_id, 'um_content_moderation', 0 );
+        update_user_meta( $user_id, 'um_diff_updates', null );
+
+        if ( ! empty( um_user( 'um_denial_profile_updates' )) && (int)um_user( 'um_denial_profile_updates' ) > 0 ) {
+            update_user_meta( $user_id, 'um_denial_profile_updates', 0 );
+        }
+
+        update_user_meta( $user_id, 'account_status', 'approved' );        
+
+        $this->redirect_to_content_moderation( $user_id );
+    }
+
+    public function um_rollback_profile_update_content_moderation( $user_id ) {
+
+        if ( current_user_can( 'administrator' ) && um_can_view_profile( $user_id )) {
+
+            um_fetch_user( $user_id );
+
+            $diff_updates = maybe_unserialize( um_user( 'um_diff_updates' ));
+            $submitted    = maybe_unserialize( um_user( 'submitted' ));
+
+            $update_user_keys = UM()->user()->update_user_keys;
+
+            $changes = array();
+
+            foreach( $diff_updates as $meta_key => $meta_value ) {
+
+                if ( in_array( $meta_key, UM()->user()->banned_keys ) ) {
+                    continue;
+                }
+
+                $meta_value = $this->meta_value_any_difference( $meta_value );
+
+                if ( is_array( $meta_value )) {
+
+                    if ( ! in_array( $meta_key, $update_user_keys ) ) {
+
+                        if ( in_array( $meta_key, array( 'first_name', 'last_name' ))) {
+                            $changes[$meta_key] = $meta_value['old'];
+                        }
+
+                        switch( $diff_updates[$meta_key]['type'] ) {
+
+                            case 'radio':
+                            case 'checkbox':
+                            case 'multiselect':     $meta_value['old'] = explode( ',', $meta_value['old'] );
+                            case 'url':
+                            case 'tel':
+                            case 'number':
+                            case 'rating':
+                            case 'date':
+                            case 'select':
+                            case 'text':
+                            case 'textarea':        if ( $meta_value['old'] === 0 ) {
+                                                        update_user_meta( $user_id, $meta_key, '0' );
+                                                        $submitted[$meta_key] = '0';
+                                                    } else {
+                                                        update_user_meta( $user_id, $meta_key, $meta_value['old'] );
+                                                        $submitted[$meta_key] = $meta_value['old'];
+                                                    }
+                                                    break;
+
+                            default:                break;
+                        }
+
+                    } else {
+
+                        if ( ! in_array( $meta_key, $this->not_update_user_keys )) {
+                            $args = array();
+                            $args['ID'] = $user_id;
+                            $args[$meta_key] = $meta_value['old'];
+
+                            wp_update_user( $args );
+                        }
+                    }
+                }
+            }
+
+            if ( count( $changes ) > 0 ) {
+                do_action( 'um_update_profile_full_name', $user_id, $changes );
+            }
+
+            $this->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_rollback_user_email' ) );
+
+            update_user_meta( $user_id, 'submitted', $submitted );
+            update_user_meta( $user_id, 'um_rollback_profile_updates', current_time( 'timestamp' ) );
+
+            $this->reset_user_after_update( $user_id );
+        }
     }
 
     public function um_disable_email_notification_content_moderation( $false, $email, $template, $args ) {
@@ -320,22 +608,9 @@ class UM_Profile_Content_Moderation {
 
                 if ( isset( $um_content_moderation ) && (int)$um_content_moderation > 0 ) {
 
-                    update_user_meta( $user->ID, 'um_content_moderation', 0 );
-                    update_user_meta( $user->ID, 'um_diff_updates', null );
+                    $this->send( $email, UM()->options()->get( 'um_content_moderation_accept_user_email' ) );
 
-                    if ( ! empty( um_user( 'um_denial_profile_updates' )) && (int)um_user( 'um_denial_profile_updates' ) > 0 ) {
-                        update_user_meta( $user->ID, 'um_denial_profile_updates', 0 );
-                    }
-
-                    update_user_meta( $user->ID, 'account_status', 'approved' );
-                    UM()->user()->remove_cache( $user->ID );
-                    um_fetch_user( $user->ID );
-
-                    $this->send( $email, UM()->options()->get( 'um_content_moderation_accept_user_email' ) );                    
-                    
-                    $uri = add_query_arg( 'content_moderation', 'awaiting_profile_review', admin_url( 'users.php' ) );
-                    wp_redirect( $uri );
-                    exit;
+                    $this->reset_user_after_update( $user->ID );
                 }
             }
         }
@@ -376,7 +651,7 @@ class UM_Profile_Content_Moderation {
 
         if ( is_admin() && $pagenow == 'users.php' && ! empty( $_REQUEST['content_moderation'] ) ) {
 
-            if ( sanitize_key( $_REQUEST['content_moderation'] ) == 'awaiting_profile_review' ) {
+            if ( sanitize_key( $_REQUEST['content_moderation'] ) === 'awaiting_profile_review' ) {
 
                 $filter_query->query_where = str_replace( 'WHERE 1=1', "WHERE 1=1 AND {$wpdb->users}.ID IN (
                                                                         SELECT {$wpdb->usermeta}.user_id FROM $wpdb->usermeta
@@ -396,7 +671,7 @@ class UM_Profile_Content_Moderation {
         add_submenu_page( 'ultimatemember', __( 'Content Moderation', 'ultimate-member' ), 
                                             __( 'Content Moderation', 'ultimate-member' ), 
                                                 'manage_options', $url , '' );
-                                                
+
         $this->copy_email_notifications_content_moderation();
     }
 
@@ -415,6 +690,7 @@ class UM_Profile_Content_Moderation {
                     $diff_updates[$meta_key]['old'] = um_user( $meta_key );
                 }
                 $diff_updates[$meta_key]['new'] = $meta_value;
+                $diff_updates[$meta_key]['type'] = $this->update_field_types[$meta_key];
             }
 
             update_user_meta( $user_id, 'um_diff_updates', $diff_updates );
@@ -487,6 +763,15 @@ class UM_Profile_Content_Moderation {
             );
 
         $settings_structure['']['sections']['users']['fields'][] = array(
+            'id'            => 'um_content_moderation_rollback_user_email',
+            'type'          => 'select',
+            'label'         => __( 'Content Moderation - User Rollback Notification', 'ultimate-member' ),
+            'tooltip'       => __( 'Select the User Rollback Notification Email template.', 'ultimate-member' ),
+            'options'       => $this->notification_emails,
+            'size'          => 'medium',
+            );
+
+        $settings_structure['']['sections']['users']['fields'][] = array(
             'id'            => 'um_content_moderation_admin_email',
             'type'          => 'select',
             'label'         => __( 'Content Moderation - Admin Notification', 'ultimate-member' ),
@@ -530,6 +815,16 @@ class UM_Profile_Content_Moderation {
                                         'body'           => '',
                                 ),
 
+                                'content_moderation_rollback_user_email' => array(
+                                        'key'            => 'content_moderation_rollback_user_email',
+                                        'title'          => __( 'Content Moderation - User Rollback Notification', 'ultimate-member' ),
+                                        'description'    => __( 'User Rollback Notification Email template', 'ultimate-member' ),
+                                        'recipient'      => 'user',
+                                        'default_active' => true,
+                                        'subject'        => '[{site_name}] Profile rollback',
+                                        'body'           => '',
+                                ),
+
                                 'content_moderation_pending_admin_email' => array(
                                         'key'            => 'content_moderation_pending_admin_email',
                                         'title'          => __( 'Content Moderation - Admin Pending Notification', 'ultimate-member' ),
@@ -557,6 +852,73 @@ class UM_Profile_Content_Moderation {
         return $emails;
     }
 
+    public function compute_Diff( $from, $to ) {
+
+        $diffValues = array();
+        $diffMask   = array();
+
+        $dm = array();
+        $n1 = count( $from );
+        $n2 = count( $to );
+
+        for ( $j = -1; $j < $n2; $j++ ) $dm[-1][$j] = CM_UNMODIFIED;
+        for ( $i = -1; $i < $n1; $i++ ) $dm[$i][-1] = CM_UNMODIFIED;
+
+        for ( $i = 0; $i < $n1; $i++ ) {
+            for ( $j = 0; $j < $n2; $j++ ) {
+
+                if ( $from[$i] == $to[$j] ) {
+                    $ad = $dm[$i - 1][$j - 1];
+                    $dm[$i][$j] = $ad + 1;
+
+                } else {
+
+                    $a1 = $dm[$i - 1][$j];
+                    $a2 = $dm[$i][$j - 1];
+                    $dm[$i][$j] = max( $a1, $a2 );
+                }
+            }
+        }
+
+        $i = $n1 - 1;
+        $j = $n2 - 1;
+
+        while (( $i > -1 ) || ( $j > -1 )) {
+
+            if ( $j > -1 ) {
+
+                if ( $dm[$i][$j - 1] == $dm[$i][$j] ) {
+                    $diffValues[] = $to[$j];
+                    $diffMask[] = CM_INSERTED;
+                    $j--;  
+                    continue;              
+                }
+            }
+
+            if ( $i > -1 ) {
+
+                if ( $dm[$i - 1][$j] == $dm[$i][$j] ) {
+                    $diffValues[] = $from[$i];
+                    $diffMask[] = CM_DELETED;
+                    $i--;
+                    continue;              
+                }
+            }
+
+            {
+                $diffValues[] = $from[$i];
+                $diffMask[] = CM_UNMODIFIED;
+                $i--;
+                $j--;
+            }
+        }    
+
+        $diffValues = array_reverse( $diffValues );
+        $diffMask   = array_reverse( $diffMask );
+
+        return array( 'values' => $diffValues, 'mask' => $diffMask );
+    }
+    
 }
 
 new UM_Profile_Content_Moderation();
