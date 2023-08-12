@@ -23,6 +23,8 @@ UM Settings -> General -> Users
 3. Template for the "Content Moderation - User Denial Notification"
 4. Template for the "Content Moderation - User Rollback Notification"
 5. Template for the "Content Moderation - Admin Notification"
+6. Placeholder {content_moderation} to display User profile updates in Admin Notification.
+7. Example of placeholder text formatting: style="text-align: left; line-height: 20px; font-size: 16px"
 
 ## Updates
 1. Version 1.1.0 Addition of User Denial Notification Email and changed dropdown menu in UM sub-menu "Content Moderation".
@@ -34,6 +36,7 @@ UM Settings -> General -> Users
 7. Version 2.2.3 Update of top bar
 8. Version 3.0.0 Profile content rollback. Highlighted profile text changes.
 9. Version 3.1.0 Disable Admin user profile updates checkbox, Code improvements
+10. Version 3.2.0 New email placeholder {content_moderation}
 
 ## Installation
 1. Download the zip file and install as a WP Plugin, activate the plugin.
