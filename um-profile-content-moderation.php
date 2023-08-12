@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.0.0
+ * Version:             3.1.0
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -10,7 +10,7 @@
  * Author URI:          https://github.com/MissVeronica
  * Text Domain:         ultimate-member
  * Domain Path:         /languages
- * UM version:          2.6.3
+ * UM version:          2.6.8
  * Source computeDiff:  https://stackoverflow.com/questions/321294/highlight-the-difference-between-two-strings-in-php
  */
 
@@ -122,13 +122,18 @@ class UM_Profile_Content_Moderation {
 
     public function um_user_edit_profile_content_moderation( $args ) {
 
-        $custom_fields = maybe_unserialize( $args['custom_fields'] );
-        foreach( $custom_fields as $meta_key => $value ) {
-            if ( is_array( $value ) && isset( $value['type'] )) {
-                $this->update_field_types[$meta_key] = $value['type'];
+        if ( isset( $args['custom_fields'] )) {
+
+            $custom_fields = maybe_unserialize( $args['custom_fields'] );
+
+            foreach( $custom_fields as $meta_key => $value ) {
+                if ( is_array( $value ) && isset( $value['type'] )) {
+                    $this->update_field_types[$meta_key] = $value['type'];
+                }
             }
+
+            $this->update_field_types['description'] = 'textarea';
         }
-        $this->update_field_types['description'] = 'textarea';
     }
 
     public function redirect_to_content_moderation( $user_id ) {
@@ -137,7 +142,7 @@ class UM_Profile_Content_Moderation {
         um_fetch_user( $user_id );
 
         $uri = add_query_arg( 'content_moderation', 'awaiting_profile_review', admin_url( 'users.php' ) );
-        wp_redirect( $uri );
+        wp_safe_redirect( $uri );
         exit;
     }
 
@@ -178,8 +183,8 @@ class UM_Profile_Content_Moderation {
     public function pre_get_users_sort_columns_custom( $query ) {
 
         if ( $query->get( 'orderby' ) == 'content_moderation' ) {
-            $query->set( 'orderby',  'meta_value' );
-            $query->set( 'meta_key', 'um_content_moderation' );
+             $query->set( 'orderby',  'meta_value' );
+             $query->set( 'meta_key', 'um_content_moderation' );
         }
     }
 
@@ -222,17 +227,21 @@ class UM_Profile_Content_Moderation {
         foreach( $this->slug as $slug ) {
 
             $located = UM()->mail()->locate_template( $slug );
-            if ( empty( $located )) {
+            if ( ! is_file( $located ) || filesize( $located ) == 0 ) {
                 $located = wp_normalize_path( STYLESHEETPATH . '/ultimate-member/email/' . $slug . '.php' );
             }
 
             clearstatcache();
-            if ( ! file_exists( $located ) ) {
+            if ( ! file_exists( $located ) || filesize( $located ) == 0 ) {
 
                 wp_mkdir_p( dirname( $located ) );
 
                 $email_source = file_get_contents( Content_Moderation_Path . $slug . '.php' );
                 file_put_contents( $located, $email_source );
+
+                if ( ! file_exists( $located ) ) {
+                    file_put_contents( um_path . 'templates/email/' . $slug . '.php', $email_source );
+                }
             }
         }
     }
@@ -265,7 +274,7 @@ class UM_Profile_Content_Moderation {
             if ( ! empty( $um_rollback_profile_updates ) && (int)$um_rollback_profile_updates > 0 ) {
                 echo '<p><label>' . sprintf( __( 'Last Profile Rollback of updates %s', 'ultimate-member' ), date( 'Y-m-d H:i:s', $um_rollback_profile_updates )) . '</label></p>';
             }
-
+//**************
             $diff_updates = maybe_unserialize( um_user( 'um_diff_updates' ));
 
             $old = __( 'Old:', 'ultimate-member' );
@@ -280,7 +289,7 @@ class UM_Profile_Content_Moderation {
                 if ( is_array( $meta_value )) {
 
                     $field = UM()->builtin()->get_a_field( $meta_key );
-                    $title = isset( $field['title'] ) ? esc_attr( $field['title'] ) : esc_attr( $field['label'] );
+                    $title = isset( $field['title'] ) ? esc_attr( $field['title'] ) : __( 'No text', 'ultimate-member' );
 
                     if ( in_array( $meta_key, $this->not_update_user_keys )) {
                         $title .= '<span title="' . sprintf( __( 'No rollback possible for the meta_key %s', 'ultimate-member' ), $meta_key ) . '" style="color: red;"> *</span>';
@@ -293,6 +302,7 @@ class UM_Profile_Content_Moderation {
                         } else {
                             $text_old = $meta_value['old'];
                         }
+
                         if ( empty( $meta_value['new'] )) {
                             $text_new = __( '(empty)', 'ultimate-member' );
                         } else {
@@ -307,8 +317,8 @@ class UM_Profile_Content_Moderation {
                             $meta_value['new'] = str_replace( array( "\n", "\r", "\t" ), ' ', $meta_value['new'] );
                         }
 
-                        $array_old = array_map( 'trim', explode( ' ', $meta_value['old'] )); 
-                        $array_new = array_map( 'trim', explode( ' ', $meta_value['new'] ));
+                        $array_old = array_map( 'sanitize_text_field', array_map( 'trim', explode( ' ', $meta_value['old'] ))); 
+                        $array_new = array_map( 'sanitize_text_field', array_map( 'trim', explode( ' ', $meta_value['new'] )));
 
                         if ( count( $array_old ) == 1 && count( $array_new ) == 1 ) {
 
@@ -363,10 +373,12 @@ class UM_Profile_Content_Moderation {
                                 $text_old = rtrim( $text_old );
                                 $text_old .= '</strong>';
                             }
+
                             if ( $new_code ) {
                                 $text_new = rtrim( $text_new );
                                 $text_new .= '</strong>';
                             }
+
                             if ( $text_old == $text_new ) {
                                 $text_new = __( 'Format changes only', 'ultimate-member' );
                             }
@@ -454,13 +466,16 @@ class UM_Profile_Content_Moderation {
 
     public function content_moderation_action() {
 
-        $um_content_moderation_forms = array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_forms' ));
-        $form_id = sanitize_text_field( $_POST['form_id'] );
+        if ( current_user_can( 'administrator' ) && UM()->options()->get( 'um_content_moderation_admin_disable' ) != 1 ) {
 
-        if ( in_array( $form_id, $um_content_moderation_forms )) {
+            $um_content_moderation_forms = array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_forms' ));
+            $form_id = sanitize_text_field( $_POST['form_id'] );
 
-            if ( in_array( UM()->user()->get_role(), array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_roles' )))) {
-                return true;
+            if ( in_array( $form_id, $um_content_moderation_forms )) {
+
+                if ( in_array( UM()->user()->get_role(), array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_roles' )))) {
+                    return true;
+                }
             }
         }
 
@@ -689,13 +704,20 @@ class UM_Profile_Content_Moderation {
                 if ( empty( $diff_updates[$meta_key]['old'] )) {
                     $diff_updates[$meta_key]['old'] = um_user( $meta_key );
                 }
+
                 $diff_updates[$meta_key]['new'] = $meta_value;
-                $diff_updates[$meta_key]['type'] = $this->update_field_types[$meta_key];
+
+                if ( isset( $this->update_field_types[$meta_key] )) {
+                    $diff_updates[$meta_key]['type'] = $this->update_field_types[$meta_key];
+                } else {
+                    $diff_updates[$meta_key]['type'] = 'text';
+                }
             }
 
             update_user_meta( $user_id, 'um_diff_updates', $diff_updates );
 
             $um_content_moderation = um_user( 'um_content_moderation' );
+
             if ( empty( $um_content_moderation ) || (int)$um_content_moderation == 0 ) {
                 $this->send_email = true;
                 update_user_meta( $user_id, 'um_content_moderation', current_time( 'timestamp' ) );
@@ -733,6 +755,13 @@ class UM_Profile_Content_Moderation {
             'tooltip'       => __( 'Select the User Role(s) to be included in Content Moderation.', 'ultimate-member' ),
             'options'       => UM()->roles()->get_roles(),
             'size'          => 'medium',
+            );
+
+        $settings_structure['']['sections']['users']['fields'][] = array(
+            'id'            => 'um_content_moderation_admin_disable',
+            'type'          => 'checkbox',
+            'label'         => __( 'Content Moderation - Admin Disable', 'ultimate-member' ),
+            'tooltip'       => __( 'Disable Admin updates of Users from Content Moderation.', 'ultimate-member' ),
             );
 
         $settings_structure['']['sections']['users']['fields'][] = array(
@@ -922,4 +951,3 @@ class UM_Profile_Content_Moderation {
 }
 
 new UM_Profile_Content_Moderation();
-
