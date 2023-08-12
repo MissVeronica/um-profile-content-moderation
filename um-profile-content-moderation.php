@@ -466,16 +466,17 @@ class UM_Profile_Content_Moderation {
 
     public function content_moderation_action() {
 
-        if ( current_user_can( 'administrator' ) && UM()->options()->get( 'um_content_moderation_admin_disable' ) != 1 ) {
+        if ( current_user_can( 'administrator' ) && UM()->options()->get( 'um_content_moderation_admin_disable' ) == 1 ) {
+            return false;
+        }
 
-            $um_content_moderation_forms = array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_forms' ));
-            $form_id = sanitize_text_field( $_POST['form_id'] );
+        $um_content_moderation_forms = array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_forms' ));
+        $form_id = sanitize_text_field( $_POST['form_id'] );
 
-            if ( in_array( $form_id, $um_content_moderation_forms )) {
+        if ( in_array( $form_id, $um_content_moderation_forms )) {
 
-                if ( in_array( UM()->user()->get_role(), array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_roles' )))) {
-                    return true;
-                }
+            if ( in_array( UM()->user()->get_role(), array_map( 'sanitize_text_field', UM()->options()->get( 'um_content_moderation_roles' )))) {
+                return true;
             }
         }
 
