@@ -40,6 +40,9 @@ UM Settings -> General -> Users
 10. Version 3.2.0 New email placeholder {content_moderation}
 11. Version 3.3.0 Bypass UM logincheck for unapproved users, Dashboard status incl reset of approved users with left settings.
 
+## Account File Manager
+1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
+
 ## Installation
 1. Download the zip file and install as a WP Plugin, activate the plugin.
 2. New Email Templates will be copied by the plugin to the UM Template folder for emails when plugin is active.
