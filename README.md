@@ -1,5 +1,5 @@
 # UM Profile Content Moderation
-Extension to Ultimate Member for Profile Content Moderation. User Profile edit will set the User into Admin Review which the Admin can releaee and accept or deny the Profile updates. Text changes are highlighted with bold words before and after profile update. Rollback to profile field content before update is possible. Unapproved Profile updates may or may not be allowed to login as of version 3.3.0
+Extension to Ultimate Member for Profile Content Moderation. User Profile edit will set the User into Admin Review which the Admin can release and accept or deny the Profile updates. Text changes are highlighted with bold words before and after profile update. Rollback to profile field content before update is possible. Unapproved Profile updates may or may not be allowed to login as of version 3.3.0
 
 ## UM Settings
 UM Settings -> General -> Users
