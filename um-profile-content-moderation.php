@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.3.0
+ * Version:             3.4.0 supports UM 2.8.3
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -10,7 +10,7 @@
  * Author URI:          https://github.com/MissVeronica
  * Text Domain:         ultimate-member
  * Domain Path:         /languages
- * UM version:          2.6.10
+ * UM version:          2.8.3
  * Source computeDiff:  https://stackoverflow.com/questions/321294/highlight-the-difference-between-two-strings-in-php
  */
 
@@ -941,82 +941,85 @@ class UM_Profile_Content_Moderation {
     }
 
     public function um_settings_structure_content_moderation( $settings_structure ) {
+    
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['title'] = 'Content Moderation';
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['description'] = 'Plugin version 3.4.0 - tested with UM 2.8.3';
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_forms',
             'type'          => 'select',
             'multi'         => true,
             'size'          => 'medium',
             'options'       => $this->profile_forms,
-            'label'         => __( 'Content Moderation - Profile Forms', 'ultimate-member' ),
-            'tooltip'       => __( 'Select single or multiple Profile Forms for Content Moderation.', 'ultimate-member' ),
+            'label'         => __( 'Profile Forms', 'ultimate-member' ),
+            'description'   => __( 'Select single or multiple Profile Forms for Content Moderation.', 'ultimate-member' ),
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_roles',
             'type'          => 'select',
             'multi'         => true,
-            'label'         => __( 'Content Moderation - User Roles', 'ultimate-member' ),
-            'tooltip'       => __( 'Select the User Role(s) to be included in Content Moderation.', 'ultimate-member' ),
+            'label'         => __( 'User Roles', 'ultimate-member' ),
+            'description'   => __( 'Select the User Role(s) to be included in Content Moderation.', 'ultimate-member' ),
             'options'       => UM()->roles()->get_roles(),
             'size'          => 'medium',
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_admin_disable',
             'type'          => 'checkbox',
-            'label'         => __( 'Content Moderation - Admin Disable', 'ultimate-member' ),
-            'tooltip'       => __( 'Click to disable Admin updates of Users from Content Moderation.', 'ultimate-member' ),
+            'label'         => __( 'Admin Disable', 'ultimate-member' ),
+            'description'   => __( 'Click to disable Admin updates of Users from Content Moderation.', 'ultimate-member' ),
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_disable_logincheck',
             'type'          => 'checkbox',
-            'label'         => __( 'Content Moderation - Allow Login', 'ultimate-member' ),
-            'tooltip'       => __( 'Click to disable UM status logincheck of Users not approved yet in Content Moderation.', 'ultimate-member' ),
+            'label'         => __( 'Allow Login', 'ultimate-member' ),
+            'description'   => __( 'Click to disable UM status logincheck of Users not approved yet in Content Moderation.', 'ultimate-member' ),
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_pending_user_email',
             'type'          => 'select',
-            'label'         => __( 'Content Moderation - User Pending Notification', 'ultimate-member' ),
-            'tooltip'       => __( 'Select the User Pending Notification Email template.', 'ultimate-member' ),
+            'label'         => __( 'User Pending Notification', 'ultimate-member' ),
+            'description'   => __( 'Select the User Pending Notification Email template.', 'ultimate-member' ),
             'options'       => $this->notification_emails,
             'size'          => 'medium',
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_accept_user_email',
             'type'          => 'select',
-            'label'         => __( 'Content Moderation - User Accept Notification', 'ultimate-member' ),
-            'tooltip'       => __( 'Select the User Accept Notification Email template.', 'ultimate-member' ),
+            'label'         => __( 'User Accept Notification', 'ultimate-member' ),
+            'description'   => __( 'Select the User Accept Notification Email template.', 'ultimate-member' ),
             'options'       => $this->notification_emails,
             'size'          => 'medium',
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_denial_user_email',
             'type'          => 'select',
-            'label'         => __( 'Content Moderation - User Denial Notification', 'ultimate-member' ),
-            'tooltip'       => __( 'Select the User Denial Notification Email template.', 'ultimate-member' ),
+            'label'         => __( 'User Denial Notification', 'ultimate-member' ),
+            'description'   => __( 'Select the User Denial Notification Email template.', 'ultimate-member' ),
             'options'       => $this->notification_emails,
             'size'          => 'medium',
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_rollback_user_email',
             'type'          => 'select',
-            'label'         => __( 'Content Moderation - User Rollback Notification', 'ultimate-member' ),
-            'tooltip'       => __( 'Select the User Rollback Notification Email template.', 'ultimate-member' ),
+            'label'         => __( 'User Rollback Notification', 'ultimate-member' ),
+            'description'   => __( 'Select the User Rollback Notification Email template.', 'ultimate-member' ),
             'options'       => $this->notification_emails,
             'size'          => 'medium',
             );
 
-        $settings_structure['']['sections']['users']['fields'][] = array(
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_admin_email',
             'type'          => 'select',
-            'label'         => __( 'Content Moderation - Admin Notification', 'ultimate-member' ),
-            'tooltip'       => __( 'Select the Admin Notification Email template.', 'ultimate-member' ),
+            'label'         => __( 'Admin Notification', 'ultimate-member' ),
+            'description'   => __( 'Select the Admin Notification Email template.', 'ultimate-member' ),
             'options'       => $this->notification_emails,
             'size'          => 'medium',
             );
@@ -1024,7 +1027,7 @@ class UM_Profile_Content_Moderation {
         return $settings_structure;
     }
 
-    public function um_email_notification_profile_content_moderation( $emails ) {
+    public function um_email_notification_profile_content_moderation( $um_emails ) {
 
         $custom_emails = array(	'content_moderation_pending_user_email' => array(
                                         'key'            => 'content_moderation_pending_user_email',
@@ -1086,11 +1089,9 @@ class UM_Profile_Content_Moderation {
             }
 
             $this->slugs[] = $slug;
-
-            $emails[ $slug ] = $custom_email;
         }
 
-        return $emails;
+        return array_merge( $um_emails, $custom_emails );
     }
 
     public function compute_Diff( $from, $to ) {
