@@ -39,6 +39,7 @@ UM Settings -> General -> Users
 9. Version 3.1.0 Disable Admin user profile updates checkbox, Code improvements
 10. Version 3.2.0 New email placeholder {content_moderation}
 11. Version 3.3.0 Bypass UM logincheck for unapproved users, Dashboard status incl reset of approved users with left settings.
+12. Version 3.4.0 Supports UM 2.8.3
 
 ## Account File Manager
 1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
