@@ -942,8 +942,8 @@ class UM_Profile_Content_Moderation {
 
     public function um_settings_structure_content_moderation( $settings_structure ) {
     
-        $settings_structure['']['sections']['users']['form_sections']['moderation']['title'] = 'Content Moderation';
-        $settings_structure['']['sections']['users']['form_sections']['moderation']['description'] = 'Plugin version 3.4.0 - tested with UM 2.8.3';
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['title']       = __( 'Content Moderation', 'ultimate-member' );
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['description'] = __( 'Plugin version 3.4.0 - tested with UM 2.8.3', 'ultimate-member' );
 
         $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_forms',
