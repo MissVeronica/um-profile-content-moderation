@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.4.0 supports UM 2.8.3
+ * Version:             3.4.1 supports UM 2.8.3
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -137,7 +137,7 @@ class UM_Profile_Content_Moderation {
 
     public function load_toplevel_page_content_moderation() {
 
-        add_meta_box( 'um-metaboxes-sidebox-20', 
+        add_meta_box( 'um-metaboxes-sidebox-3', 
                             __( 'Content Moderation', 'ultimate-member' ), 
                             array( $this, 'toplevel_page_content_moderation' ), 'toplevel_page_ultimatemember', 'side', 'core' );
     }
