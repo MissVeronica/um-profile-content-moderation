@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.4.1 supports UM 2.8.3
+ * Version:             3.5.0 supports UM 2.8.5
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -10,13 +10,14 @@
  * Author URI:          https://github.com/MissVeronica
  * Text Domain:         ultimate-member
  * Domain Path:         /languages
- * UM version:          2.8.3
+ * UM version:          2.8.5
  * Source computeDiff:  https://stackoverflow.com/questions/321294/highlight-the-difference-between-two-strings-in-php
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
 if ( ! class_exists( 'UM' ) ) return;
 
+use um\core\Options;
 class UM_Profile_Content_Moderation {
 
     public $profile_forms        = array();
@@ -137,7 +138,7 @@ class UM_Profile_Content_Moderation {
 
     public function load_toplevel_page_content_moderation() {
 
-        add_meta_box( 'um-metaboxes-sidebox-3', 
+        add_meta_box( 'um-metaboxes-sidebox-2', 
                             __( 'Content Moderation', 'ultimate-member' ), 
                             array( $this, 'toplevel_page_content_moderation' ), 'toplevel_page_ultimatemember', 'side', 'core' );
     }
@@ -209,9 +210,14 @@ class UM_Profile_Content_Moderation {
 <?php
             clearstatcache();
             echo '<hr>';
+
+            $UM_class = new Options();
+            $reflectionProperty = new \ReflectionProperty( Options::class, 'options' );
+            $reflectionProperty->setAccessible( true );
+
             foreach( $this->templates as $template ) {
-                $subject = UM()->options()->options[ "content_moderation_{$template}_email" . '_sub' ];
-                $status  = UM()->options()->options[ "content_moderation_{$template}_email" . '_on' ];
+                $subject = $reflectionProperty->getValue( $UM_class )[ "content_moderation_{$template}_email" . '_sub' ];
+                $status  = $reflectionProperty->getValue( $UM_class )[ "content_moderation_{$template}_email" . '_on' ];
                 $status  = empty( $status ) ? __( 'Email not active', 'ultimate-member' ) : __( 'Email active', 'ultimate-member' );
                 $located = wp_normalize_path( STYLESHEETPATH . '/ultimate-member/email/' . "content_moderation_{$template}_email" . '.php' );
                 $exists  = file_exists( $located ) ? '' : __( 'Template not found', 'ultimate-member' )?>
@@ -942,8 +948,8 @@ class UM_Profile_Content_Moderation {
 
     public function um_settings_structure_content_moderation( $settings_structure ) {
     
-        $settings_structure['']['sections']['users']['form_sections']['moderation']['title']       = __( 'Content Moderation', 'ultimate-member' );
-        $settings_structure['']['sections']['users']['form_sections']['moderation']['description'] = __( 'Plugin version 3.4.0 - tested with UM 2.8.3', 'ultimate-member' );
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['title'] = __( 'Profile Content Moderation', 'ultimate-member' );
+        $settings_structure['']['sections']['users']['form_sections']['moderation']['description'] =  __( 'Plugin version 3.5.0 - tested with UM 2.8.5', 'ultimate-member' );
 
         $settings_structure['']['sections']['users']['form_sections']['moderation']['fields'][] = array(
             'id'            => 'um_content_moderation_forms',
@@ -1080,12 +1086,17 @@ class UM_Profile_Content_Moderation {
                                 ),
                             );
 
+        $UM_class = new Options();
+        $reflectionProperty = new \ReflectionProperty( Options::class, 'options' );
+        $reflectionProperty->setAccessible( true );
+
         foreach ( $custom_emails as $slug => $custom_email ) {
+    
+            if ( ! array_key_exists( $slug . '_on', $reflectionProperty->getValue( $UM_class ) ) ) {
 
-            if ( ! array_key_exists( $slug . '_on', UM()->options()->options ) ) {
-
-                UM()->options()->options[ $slug . '_on' ]  = empty( $custom_email['default_active'] ) ? 0 : 1;
-                UM()->options()->options[ $slug . '_sub' ] = $custom_email['subject'];
+                $slug_on = empty( $custom_email['default_active'] ) ? 0 : 1;
+                $reflectionProperty->setValue( $UM_class[ $slug . '_on' ],  $slug_on );
+                $reflectionProperty->setValue( $UM_class[ $slug . '_sub' ], $custom_email['subject'] );
             }
 
             $this->slugs[] = $slug;
