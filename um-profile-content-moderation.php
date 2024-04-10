@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.5.0 supports UM 2.8.5
+ * Version:             3.5.1 supports UM 2.8.5
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -1094,9 +1094,10 @@ class UM_Profile_Content_Moderation {
     
             if ( ! array_key_exists( $slug . '_on', $reflectionProperty->getValue( $UM_class ) ) ) {
 
-                $slug_on = empty( $custom_email['default_active'] ) ? 0 : 1;
-                $reflectionProperty->setValue( $UM_class[ $slug . '_on' ],  $slug_on );
-                $reflectionProperty->setValue( $UM_class[ $slug . '_sub' ], $custom_email['subject'] );
+                $UM_options = $reflectionProperty->getValue( $UM_class );
+                $UM_options[ $slug . '_on' ]  = empty( $custom_email['default_active'] ) ? 0 : 1;
+                $UM_options[ $slug . '_sub' ] = $custom_email['subject'];
+                $reflectionProperty->setValue( $UM_class, $UM_options );
             }
 
             $this->slugs[] = $slug;
