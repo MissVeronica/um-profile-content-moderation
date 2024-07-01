@@ -42,6 +42,7 @@ UM Settings -> General -> Users
 12. Version 3.4.0 Supports UM 2.8.3
 13. Version 3.4.1 Dashboard column 3
 14. Version 3,5.0/3.5.1 Supports UM 2.8.5
+15. Version 3.5.2 Code improvements 
 
 ## Account File Manager
 1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
