@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.5.1 supports UM 2.8.5
+ * Version:             3.5.2 supports UM 2.8.6
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -10,7 +10,7 @@
  * Author URI:          https://github.com/MissVeronica
  * Text Domain:         ultimate-member
  * Domain Path:         /languages
- * UM version:          2.8.5
+ * UM version:          2.8.6
  * Source computeDiff:  https://stackoverflow.com/questions/321294/highlight-the-difference-between-two-strings-in-php
  */
 
@@ -25,7 +25,7 @@ class UM_Profile_Content_Moderation {
     public $slugs                = array();
     public $update_field_types   = array();
     public $not_update_user_keys = array( 'role', 'pass', 'password' );
-    public $send_email           = false;
+    public $send_email           = true;
     public $templates            = array( 'pending_user', 'accept_user', 'denial_user', 'rollback_user', 'pending_admin' );
 
     function __construct() {
@@ -138,7 +138,7 @@ class UM_Profile_Content_Moderation {
 
     public function load_toplevel_page_content_moderation() {
 
-        add_meta_box( 'um-metaboxes-sidebox-2', 
+        add_meta_box( 'um-metaboxes-sidebox-content-moderation', 
                             __( 'Content Moderation', 'ultimate-member' ), 
                             array( $this, 'toplevel_page_content_moderation' ), 'toplevel_page_ultimatemember', 'side', 'core' );
     }
@@ -913,8 +913,10 @@ class UM_Profile_Content_Moderation {
 
             if ( empty( $um_content_moderation ) || (int)$um_content_moderation == 0 ) {
 
-                $this->send_email = true;
                 update_user_meta( $user_id, 'um_content_moderation', current_time( 'timestamp' ) );
+
+            } else {
+                $this->send_email = false;
             }
         }
     }
@@ -1176,3 +1178,4 @@ class UM_Profile_Content_Moderation {
 }
 
 new UM_Profile_Content_Moderation();
+
