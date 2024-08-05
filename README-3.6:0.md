@@ -14,7 +14,7 @@ Plugin version update check each 24 hours with documentation link.
 3. * UM Dashboard Modal - Click to enable the UM Dashboard modal for Content Moderation.
 ### User Info
 4. * Enable User Update Status - Click to enable a "days since update" colored Profile circle after the Profile page User name.
-5. * Enter colors for the Profile circle - Enter colors either by color name or HEX code comma separated for each day's display of the "days since update" Profile circle. Default color is "white" and displated for 7 days.
+5. * Enter colors for the Profile circle - Enter colors either by color name or HEX code comma separated for each day's display of the "days since update" Profile circle. Default color is "white" and is displayed for 7 days.
 6. * Enable transparency increase for the Profile circle - Click to enable increased transparency of the "days since update" Profile circle for each day after approved update.
 7. * Enter size in pixels for the Profile circle - Enter size in pixels for the "days since update" Profile circle. Default value is 24 pixels.
 ### Moderation Process
