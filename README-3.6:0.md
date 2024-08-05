@@ -16,21 +16,22 @@ Plugin version update check each 24 hours with documentation link.
 4. * Enable User Update Status - Click to enable a "days since update" colored Profile circle after the Profile page User name.
 5. * Enter colors for the Profile circle - Enter colors either by color name or HEX code comma separated for each day's display of the "days since update" Profile circle. Default color is "white" and displated for 7 days.
 6. * Enable transparency increase for the Profile circle - Click to enable increased transparency of the "days since update" Profile circle for each day after approved update.
+7. * Enter size in pixels for the Profile circle - Enter size in pixels for the "days since update" Profile circle. Default value is 24 pixels.
 ### Moderation Process
-7. * Delay User Profile update during Moderation - Click to enable the delay of the User Profile update until approved by a site Moderator.
-8. * Delay User Profile update during Moderation - Settings are only displayed for changes when the queue of users waiting for approval is empty.
-9. * Delay User Profile update URL at the Cog wheel menu - Enter an URL to a page where you explain the Content Moderation with delayed update procedure at your site. Link replaces "Edit Profile" when user is awaiting Content Moderation. Blank URL disables link and "Edit Profile" text.
-10. * Delay User Profile update text at the Cog wheel menu - Enter a short URL text message. Default text is "Why Content Moderation". 
-11. * Disable Admin updates Moderation - Click to disable Admin updates of Users from Content Moderation.
-12. * Allow Users Login - Click to disable UM status logincheck of Users not approved yet in Content Moderation.
+8. * Delay User Profile update during Moderation - Click to enable the delay of the User Profile update until approved by a site Moderator.
+9. * Delay User Profile update during Moderation - Settings are only displayed for changes when the queue of users waiting for approval is empty.
+10. * Delay User Profile update URL at the Cog wheel menu - Enter an URL to a page where you explain the Content Moderation with delayed update procedure at your site. Link replaces "Edit Profile" when user is awaiting Content Moderation. Blank URL disables link and "Edit Profile" text.
+11. * Delay User Profile update text at the Cog wheel menu - Enter a short URL text message. Default text is "Why Content Moderation". 
+12. * Disable Admin updates Moderation - Click to disable Admin updates of Users from Content Moderation.
+13. * Allow Users Login - Click to disable UM status logincheck of Users not approved yet in Content Moderation.
 ### Registration Approval
-13. * Enable Email Activation plus Admin Review - Click to enable Admin Review after successful Email Activation by the User. UM Setting Registration email Activation must be set in advance.
+14. * Enable Email Activation plus Admin Review - Click to enable Admin Review after successful Email Activation by the User. UM Setting Registration email Activation must be set in advance.
 ### Email Templates
-14. * User Pending Notification - Select the User Pending Notification Email template.
-15. * User Accept Notification - Select the User Accept Notification Email template. 
-16. * User Denial Notification - Select the User Denial Notification Email template.
-17. * User Rollback Notification - User Rollback Notification Email template.
-18. * Admin Notification - Select the Admin Notification Email template.
+15. * User Pending Notification - Select the User Pending Notification Email template.
+16. * User Accept Notification - Select the User Accept Notification Email template. 
+17. * User Denial Notification - Select the User Denial Notification Email template.
+18. * User Rollback Notification - User Rollback Notification Email template.
+19. * Admin Notification - Select the Admin Notification Email template.
 
 ## UM Admin Menu
 1. Additional UM sub-menu "Content Moderation" for listing of all Users waiting for profile content moderation.
