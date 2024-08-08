@@ -45,6 +45,7 @@ Plugin version update check each 24 hours with documentation link.
 
 ## User Profile page
 1. After User name: "days since update" colored Profile circle with increasing transparency each day after approval
+2. New User Proofile edit disabled until Moderator approved. Edit Link replaced with cusdtom info.
 
 ## UM Email Templates
 1. Template for the "Content Moderation - User Pending Notification"
