@@ -38,8 +38,13 @@ Plugin version update check each 24 hours with documentation link.
 2. Available UM Bulk User Actions: Approve Profile Update, Deny Profile Update, Rollback Profile Update, Deactivate
 3. "Review Profile Content Moderation" Modal with before/after content of updated fields with a dropdown "Moderation" link
 
-## Userr Profile page
-1. After User name: "days since update" colored Profile circle
+## UM Dashboard
+1. Optional Modal for the plugin
+2. Button: Reset Moderation cache counters
+3. Button: Reset any left User Profile update values and Moderation cache counters
+
+## User Profile page
+1. After User name: "days since update" colored Profile circle with increasing transparency each day after approval
 
 ## UM Email Templates
 1. Template for the "Content Moderation - User Pending Notification"
@@ -49,6 +54,12 @@ Plugin version update check each 24 hours with documentation link.
 5. Template for the "Content Moderation - Admin Notification"
 6. Placeholder {content_moderation} to display User profile updates in Admin Notification.
 7. Example of placeholder text formatting: style="text-align: left; line-height: 20px; font-size: 16px"
+
+## Translations & Text changes
+1. Use the "Loco Translate" plugin.
+2. https://wordpress.org/plugins/loco-translate/
+3. For a few changes of text use the "Say What?" plugin with text domain content-moderation
+4. https://wordpress.org/plugins/say-what/
 
 ## Updates
 1. Version 1.1.0 Addition of User Denial Notification Email and changed dropdown menu in UM sub-menu "Content Moderation".
