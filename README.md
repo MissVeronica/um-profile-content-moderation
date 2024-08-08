@@ -1,22 +1,50 @@
-# UM Profile Content Moderation
-Extension to Ultimate Member for Profile Content Moderation. User Profile edit will set the User into Admin Review which the Admin can release and accept or deny the Profile updates. Text changes are highlighted with bold words before and after profile update. Rollback to profile field content before update is possible. Unapproved Profile updates may or may not be allowed to login as of version 3.3.0
+# UM Profile Content Moderation version 3.6.0
+Extension to Ultimate Member for Profile Content Moderation. 
+User Profile edit will set the User into Admin Review which the Admin can release and accept or deny the Profile updates. 
+Text changes are highlighted with bold words before and after profile update. 
+Rollback to profile field content before update is possible. 
+Unapproved Profile updates may or may not be allowed to login as of version 3.3.0
+Version 3.6.0 allows the User to continue without approval using old Profile data until approved by a Moderator when the User Profile real update is performed.
 
-## UM Settings
-UM Settings -> General -> Users
-1. Content Moderation - Profile Forms - Select single or multiple Profile Forms for Content Moderation.
-2. Content Moderation - User Roles - Select the User Role(s) to be included in Content Moderation.
-3. Content Moderation - Admin Disable - Disable Admin updates of Users from Content Moderation.
-4. Content Moderation - Allow Login - Click to disable UM status logincheck of Users not approved yet in Content Moderation
-5. Content Moderation - User Pending Notification - Select the User Pending Notification Email template.
-6. Content Moderation - User Accept Notification - Select the User Accept Notification Email template. 
-7. Content Moderation - User Denial Notification - Select the User Denial Notification Email template.
-8. Content Moderation - User Rollback Notification - User Rollback Notification Email template.
-9. Content Moderation - Admin Notification - Select the Admin Notification Email template.
+## UM Settings -> Extensions -> Profile Content Moderation
+Plugin version update check each 24 hours with documentation link.
+### Moderation Forms & Roles
+1. * Profile Forms - Select single or multiple Profile Forms for Content Moderation.
+2. * User Roles - Select the User Role(s) to be included in Content Moderation.
+3. * UM Dashboard Modal - Click to enable the UM Dashboard modal for Content Moderation.
+### User Info
+4. * Enable User Update Status - Click to enable a "days since update" colored Profile circle after the Profile page User name.
+5. * Enter colors for the Profile circle - Enter colors either by color name or HEX code comma separated for each day's display of the "days since update" Profile circle. Default color is "white" and is displayed for 7 days.
+6. * Enable transparency increase for the Profile circle - Click to enable increased transparency of the "days since update" Profile circle for each day after approved update.
+7. * Enter size in pixels for the Profile circle - Enter size in pixels for the "days since update" Profile circle. Default value is 24 pixels.
+### Moderation Process
+8. * Delay User Profile update during Moderation - Click to enable the delay of the User Profile update until approved by a site Moderator.
+9. * Delay User Profile update during Moderation - Settings are only displayed for changes when the queue of users waiting for approval is empty.
+10. * Delay User Profile update URL at the Cog wheel menu - Enter an URL to a page where you explain the Content Moderation with delayed update procedure at your site. Link replaces "Edit Profile" when user is awaiting Content Moderation. Blank URL disables link and "Edit Profile" text.
+11. * Delay User Profile update text at the Cog wheel menu - Enter a short URL text message. Default text is "Why Content Moderation". 
+12. * Disable Admin updates Moderation - Click to disable Admin updates of Users from Content Moderation.
+13. * Allow Users Login - Click to disable UM status logincheck of Users not approved yet in Content Moderation.
+### Registration Approval
+14. * Enable Email Activation plus Admin Review - Click to enable Admin Review after successful Email Activation by the User. UM Setting Registration email Activation must be set in advance.
+### Email Templates
+15. * User Pending Notification - Select the User Pending Notification Email template.
+16. * User Accept Notification - Select the User Accept Notification Email template. 
+17. * User Denial Notification - Select the User Denial Notification Email template.
+18. * User Rollback Notification - User Rollback Notification Email template.
+19. * Admin Notification - Select the Admin Notification Email template.
 
 ## UM Admin Menu
 1. Additional UM sub-menu "Content Moderation" for listing of all Users waiting for profile content moderation.
 2. Available UM Bulk User Actions: Approve Profile Update, Deny Profile Update, Rollback Profile Update, Deactivate
 3. "Review Profile Content Moderation" Modal with before/after content of updated fields with a dropdown "Moderation" link
+
+## UM Dashboard
+1. Optional Modal for the plugin
+2. Button: Reset Moderation cache counters
+3. Button: Reset any left User Profile update values and Moderation cache counters
+
+## User Profile page
+1. After User name: "days since update" colored Profile circle with increasing transparency each day after approval
 
 ## UM Email Templates
 1. Template for the "Content Moderation - User Pending Notification"
@@ -26,6 +54,12 @@ UM Settings -> General -> Users
 5. Template for the "Content Moderation - Admin Notification"
 6. Placeholder {content_moderation} to display User profile updates in Admin Notification.
 7. Example of placeholder text formatting: style="text-align: left; line-height: 20px; font-size: 16px"
+
+## Translations & Text changes
+1. Use the "Loco Translate" plugin.
+2. https://wordpress.org/plugins/loco-translate/
+3. For a few changes of text use the "Say What?" plugin with text domain content-moderation
+4. https://wordpress.org/plugins/say-what/
 
 ## Updates
 1. Version 1.1.0 Addition of User Denial Notification Email and changed dropdown menu in UM sub-menu "Content Moderation".
@@ -42,7 +76,8 @@ UM Settings -> General -> Users
 12. Version 3.4.0 Supports UM 2.8.3
 13. Version 3.4.1 Dashboard column 3
 14. Version 3,5.0/3.5.1 Supports UM 2.8.5
-15. Version 3.5.2 Code improvements 
+15. Version 3.5.2 Code improvements
+16. Version 3.6.0 Settings moved to UM Extensions. Delay User Profile update during Moderation. User Update Status: "days since update". Email Activation plus Admin Review. Backend performance improvements. Plugin version update check each 24 hours. Translation ready.
 
 ## Account File Manager
 1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
