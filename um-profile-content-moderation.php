@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.6.0
+ * Version:             3.6.1
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -1455,7 +1455,7 @@ class UM_Profile_Content_Moderation {
 
                 $settings['extensions']['sections']['content-moderation']['title'] = __( 'Profile Content Moderation', 'content-moderation' );
 
-                if ( isset( $_REQUEST['section'] ) && $_REQUEST['section'] == 'content-moderation' ) {
+                if ( ! isset( $_REQUEST['section'] ) || $_REQUEST['section'] == 'content-moderation' ) {
 
                     $settings['extensions']['sections']['content-moderation']['description'] = $this->get_possible_plugin_update( 'um-content-moderation' );
                     $settings['extensions']['sections']['content-moderation']['fields']      = $this->create_plugin_settings_fields();
@@ -1874,4 +1874,3 @@ class UM_Profile_Content_Moderation {
 }
 
 new UM_Profile_Content_Moderation();
-
