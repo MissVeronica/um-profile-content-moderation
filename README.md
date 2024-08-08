@@ -80,6 +80,7 @@ Plugin version update check each 24 hours with documentation link.
 14. Version 3,5.0/3.5.1 Supports UM 2.8.5
 15. Version 3.5.2 Code improvements
 16. Version 3.6.0 Settings moved to UM Extensions. Delay User Profile update during Moderation. User Update Status: "days since update". Email Activation plus Admin Review. Backend performance improvements. Plugin version update check each 24 hours. Translation ready.
+17. Version 3.6.1 Fix when the plugin is the first UM Extension
 
 ## Account File Manager
 1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
