@@ -20,6 +20,7 @@ Plugin version update check each 24 hours with documentation link.
 7. * Enter size in pixels for the Profile circle - Enter size in pixels for the "days since update" Profile circle. Default value is 24 pixels.
 ### Moderation Process
 Default: User set to UM "Admin Review" status with Profile updated. Option from version 3.6.0: Delayed Profile update until approved by a site Moderator.
+
 8. * Delay User Profile update during Moderation - Click to enable the delay of the User Profile update until approved by a site Moderator.
 9. * Delay User Profile update during Moderation - Settings are only displayed for changes when the queue of users waiting for approval is empty.
 10. * Delay User Profile update URL at the Cog wheel menu - Enter an URL to a page where you explain the Content Moderation with delayed update procedure at your site. Link replaces "Edit Profile" when user is awaiting Content Moderation. Blank URL disables link and "Edit Profile" text.
