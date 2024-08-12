@@ -56,7 +56,8 @@ Plugin version update check each 24 hours with documentation link.
 5. Template for the "Content Moderation - Admin Notification"
 6. Placeholder {content_moderation} to display User profile updates in Admin Notification.
 7. Example of placeholder text formatting: style="text-align: left; line-height: 20px; font-size: 16px"
-8. For User Role dependant email content, use the "Email Parse Shortcode" plugin. https://github.com/MissVeronica/um-email-parse-shortcode
+8. For User Role dependant email content, use the "Email Parse Shortcode" plugin.
+9. https://github.com/MissVeronica/um-email-parse-shortcode
 
 ## Translations & Text changes
 1. Use the "Loco Translate" plugin.
