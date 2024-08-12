@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.6.1
+ * Version:             3.6.2
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -35,6 +35,7 @@ class UM_Profile_Content_Moderation {
     public $seconds_in_week      = 7 * DAY_IN_SECONDS;
     public $half_day_seconds     = 12 * 3600;
     public $new_plugin_version   = '';
+    public $done_settings        = false;
     
     public $cached_meta_keys     = array( 'um_content_moderation', 'um_denial_profile_updates', 'um_rollback_profile_updates' );
     public $cached_meta_values   = array();
@@ -130,6 +131,7 @@ class UM_Profile_Content_Moderation {
         add_action( 'um_user_after_updating_profile',            array( $this, 'um_user_after_updating_profile_set_pending' ), 10, 3 );
         add_action( 'um_user_edit_profile',                      array( $this, 'um_user_edit_profile_content_moderation' ), 10, 1 );
         add_filter( 'um_myprofile_edit_menu_items',              array( $this, 'um_myprofile_edit_menu_items_content_moderation' ), 10, 1 );
+        add_filter( 'um_profile_edit_menu_items',                array( $this, 'um_myprofile_edit_menu_items_content_moderation' ), 10, 1 );
         add_filter( 'um_user_pre_updating_profile_array',        array( $this, 'um_user_pre_updating_profile_array_delay_update' ), 10, 3 );
         add_action( 'plugins_loaded',                            array( $this, 'um_content_moderation_plugin_loaded' ), 0 );
         add_action( 'um_after_email_confirmation',               array( $this, 'um_after_email_confirmation_admin_approval' ), 10, 1 );
@@ -229,8 +231,10 @@ class UM_Profile_Content_Moderation {
     public function um_user_pre_updating_profile_array_delay_update( $to_update, $user_id, $form_data ) {
 
         if ( UM()->options()->get( 'um_content_moderation_delay_update' ) == 1 ) {
+            if ( UM()->options()->get( 'um_content_moderation_admin_disable' ) != 1 ) {
 
-            $to_update = array();
+                $to_update = array();
+            }
         }
 
         return $to_update;
@@ -239,28 +243,30 @@ class UM_Profile_Content_Moderation {
     public function um_myprofile_edit_menu_items_content_moderation( $items ) {
 
         if ( UM()->options()->get( 'um_content_moderation_delay_update' ) == 1 ) {
+            if ( UM()->options()->get( 'um_content_moderation_admin_disable' ) != 1 ) {
 
-            if ( (int)um_user( 'um_content_moderation' ) > 1000 ) {
+                if ( (int)um_user( 'um_content_moderation' ) > 1000 ) {
 
-                $url = sanitize_url( UM()->options()->get( 'um_content_moderation_delay_url' ));
-                
-                if ( ! empty( $url )) {
+                    $url = sanitize_url( UM()->options()->get( 'um_content_moderation_delay_url' ));
+                    
+                    if ( ! empty( $url )) {
 
-                    $url_text = sanitize_text_field( UM()->options()->get( 'um_content_moderation_delay_url_text' ));
+                        $url_text = sanitize_text_field( UM()->options()->get( 'um_content_moderation_delay_url_text' ));
 
-                    $items['editprofile'] = '<a href="' . esc_url( $url ) . '" class="real_url" target="_blank">';
+                        $items['editprofile'] = '<a href="' . esc_url( $url ) . '" class="real_url" target="_blank">';
 
-                    if ( empty( $url_text )) {
-                        $items['editprofile'] .=  __( 'Why Content Moderation', 'content-moderation' );
+                        if ( empty( $url_text )) {
+                            $items['editprofile'] .=  __( 'Why Content Moderation', 'content-moderation' );
+
+                        } else {
+                            $items['editprofile'] .=  esc_attr( $url_text );
+                        }
+
+                        $items['editprofile'] .= '</a>'; 
 
                     } else {
-                        $items['editprofile'] .=  esc_attr( $url_text );
+                        unset( $items['editprofile'] );
                     }
-
-                    $items['editprofile'] .= '</a>'; 
-
-                } else {
-                    unset( $items['editprofile'] );
                 }
             }
         }
@@ -1237,10 +1243,12 @@ class UM_Profile_Content_Moderation {
             $um_content_moderation = um_user( 'um_content_moderation' );
 
             if ( UM()->options()->get( 'um_content_moderation_delay_update' ) == 1 ) {
+                if ( UM()->options()->get( 'um_content_moderation_admin_disable' ) != 1 ) {
 
-                update_user_meta( $user_id, 'um_delay_profile_updates', array( 'to_update' => $to_update, 'whitelist' => UM()->form()->usermeta_whitelist ));
-                $diff_updates = array();
-                $um_content_moderation = 0;
+                    update_user_meta( $user_id, 'um_delay_profile_updates', array( 'to_update' => $to_update, 'whitelist' => UM()->form()->usermeta_whitelist ));
+                    $diff_updates = array();
+                    $um_content_moderation = 0;
+                }
 
             } else {
 
@@ -1457,8 +1465,11 @@ class UM_Profile_Content_Moderation {
 
                 if ( ! isset( $_REQUEST['section'] ) || $_REQUEST['section'] == 'content-moderation' ) {
 
-                    $settings['extensions']['sections']['content-moderation']['description'] = $this->get_possible_plugin_update( 'um-content-moderation' );
-                    $settings['extensions']['sections']['content-moderation']['fields']      = $this->create_plugin_settings_fields();
+                    if ( ! $this->done_settings ) {
+                        $settings['extensions']['sections']['content-moderation']['description'] = $this->get_possible_plugin_update( 'um-content-moderation' );
+                        $settings['extensions']['sections']['content-moderation']['fields']      = $this->create_plugin_settings_fields();
+                        $this->done_settings = true;
+                    }
                 }
             }
         }
@@ -1874,3 +1885,6 @@ class UM_Profile_Content_Moderation {
 }
 
 new UM_Profile_Content_Moderation();
+
+
+
