@@ -11,6 +11,7 @@ Plugin version update check each 24 hours with documentation link.
 ### Moderation Forms & Roles
 1. * Profile Forms - Select single or multiple Profile Forms for Content Moderation.
 2. * User Roles - Select the User Role(s) to be included in Content Moderation.
+### UM Dashboard
 3. * UM Dashboard Modal - Click to enable the UM Dashboard modal for Content Moderation.
 ### User Info
 4. * Enable User Update Status - Click to enable a "days since update" colored Profile circle after the Profile page User name.
