@@ -4,6 +4,7 @@ User Profile edit will set the User into Admin Review which the Admin can releas
 Text changes are highlighted with bold words before and after profile update. 
 Rollback to profile field content before update is possible. 
 Unapproved Profile updates may or may not be allowed to login as of version 3.3.0
+
 Version 3.6.0 allows the User to continue without approval using old Profile data until approved by a Moderator when the User Profile real update is performed.
 
 ## UM Settings -> Extensions -> Profile Content Moderation
