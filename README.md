@@ -1,4 +1,5 @@
 # UM Profile Content Moderation version 3.6.3
+### Content Moderation plugin version 3.7.0 will support UM 2.8.7
 Extension to Ultimate Member for Profile Content Moderation. 
 User Profile edit will set the User into Admin Review which the Admin can release and accept or deny the Profile updates. 
 Text changes are highlighted with bold words before and after profile update. 
