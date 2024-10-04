@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.7.0
+ * Version:             3.7.1
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -46,6 +46,11 @@ class UM_Profile_Content_Moderation {
                                             'rollback_user' => 'rollback_user',
                                             'pending_admin' => 'pending_admin',
                                         );
+    public $actions_list         = array(   'um_approve_profile_update',
+                                            'um_accept_profile_update',
+                                            'um_rollback_profile_update',
+                                            'um_deny_profile_update'
+                                        );
 
     function __construct() {
 
@@ -63,15 +68,19 @@ class UM_Profile_Content_Moderation {
 
             add_filter( 'manage_users_sortable_columns', array( $this, 'register_sortable_columns_custom' ), 10, 1 );
             add_action( 'pre_get_users',                 array( $this, 'pre_get_users_sort_columns_custom' ));
-            
+
             add_filter( 'um_disable_email_notification_sending',  array( $this, 'um_disable_email_notification_content_moderation' ), 10, 4 );
 
-            add_action( "handle_bulk_actions-users",              array( $this, 'um_profile_update_content_moderation' ), 10, 3 );  // UM2.8.7
+            if ( isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], $this->actions_list )) {
+
+                add_action( "handle_bulk_actions-users",          array( $this, 'um_profile_update_content_moderation' ), 10, 3 );  // UM2.8.7
+            }
+
             add_filter( 'bulk_actions-users',                     array( $this, 'um_admin_bulk_user_actions_content_moderation' ) );  // UM2.8.7 function changes
 
             add_filter( 'um_admin_user_row_actions',              array( $this, 'um_admin_user_row_actions_content_moderation' ), 10, 2 );
             add_action( 'um_admin_do_action__content_moderation', array( $this, 'content_moderation_reset' ) );
-            add_filter( 'um_adm_action_custom_update_notice',     array( $this, 'content_moderation_reset_notice' ), 10, 2 );
+            add_filter( 'um_adm_action_custom_update_notice',     array( $this, 'content_moderation_reset_notice' ), 99, 2 );
 
             add_action( 'um_admin_ajax_modal_content__hook_content_moderation_review_update', array( $this, 'content_moderation_review_update_ajax_modal' ));
 
@@ -142,7 +151,7 @@ class UM_Profile_Content_Moderation {
     function content_moderation_settings_link( $links ) {
 
         $url = get_admin_url() . 'admin.php?page=um_options&tab=extensions&section=content-moderation';
-        $links[] = '<a href="' . esc_url( $url ) . '">' . __( 'Settings' ) . '</a>';
+        $links[] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings' ) . '</a>';
 
         return $links;
     }
@@ -169,9 +178,9 @@ class UM_Profile_Content_Moderation {
 
                         switch ( $number_days ) {
 
-                            case 0:     $title = __( 'The latest update of the User Profile: today',     'content-moderation' ); break;
-                            case 1:     $title = __( 'The latest update of the User Profile: yesterday', 'content-moderation' ); break;
-                            default:    $title = sprintf( __( 'Time since the latest update of the User Profile: %d days ago %s', 'content-moderation' ), $number_days, date_i18n( 'Y/m/d H:i', $last_update ));
+                            case 0:     $title = esc_html__( 'The latest update of the User Profile: today',     'content-moderation' ); break;
+                            case 1:     $title = esc_html__( 'The latest update of the User Profile: yesterday', 'content-moderation' ); break;
+                            default:    $title = sprintf( esc_html__( 'Time since the latest update of the User Profile: %d days ago %s', 'content-moderation' ), $number_days, date_i18n( 'Y/m/d H:i', $last_update ));
                         }
 
                         $opacity = '1.0';
@@ -244,7 +253,7 @@ class UM_Profile_Content_Moderation {
                 $items['editprofile'] = '<a href="' . esc_url( $url ) . '" class="real_url" target="_blank">';
 
                 if ( empty( $url_text )) {
-                    $items['editprofile'] .=  __( 'Why Content Moderation', 'content-moderation' );
+                    $items['editprofile'] .=  esc_html__( 'Why Content Moderation', 'content-moderation' );
 
                 } else {
                     $items['editprofile'] .=  esc_attr( $url_text );
@@ -318,7 +327,7 @@ class UM_Profile_Content_Moderation {
         $this->moderation_count = $this->format_users( $this->count_content_values( 'um_content_moderation' ));
 
         add_meta_box( 'um-metaboxes-sidebox-content-moderation',
-                        sprintf( __( 'Content Moderation - %s waiting', 'content-moderation' ), $this->moderation_count ),
+                        sprintf( esc_html__( 'Content Moderation - %s waiting', 'content-moderation' ), $this->moderation_count ),
                         array( $this, 'toplevel_page_content_moderation' ),
                         'toplevel_page_ultimatemember',
                         'side', 'core'
@@ -362,11 +371,11 @@ class UM_Profile_Content_Moderation {
     public function format_users( $counter ) {
 
         if ( $counter == 0 ) {
-            $count_users = __( 'No users', 'content-moderation' );
+            $count_users = esc_html__( 'No users', 'content-moderation' );
 
         } else {
 
-            $count_users = ( $counter > 1 ) ? sprintf( __( '%d users', 'content-moderation' ), $counter ) : __( 'One user', 'content-moderation' );
+            $count_users = ( $counter > 1 ) ? sprintf( esc_html__( '%d users', 'content-moderation' ), $counter ) : esc_html__( 'One user', 'content-moderation' );
         }
 
         return $count_users;
@@ -393,7 +402,7 @@ class UM_Profile_Content_Moderation {
 
         } else {
 
-            $moderated_roles[] = __( 'None', 'content-moderation' );
+            $moderated_roles[] = esc_html__( 'None', 'content-moderation' );
         }
 
         $forms = UM()->options()->get( 'um_content_moderation_forms' );
@@ -408,25 +417,25 @@ class UM_Profile_Content_Moderation {
 
         } else {
 
-            $moderated_forms[] = __( 'None', 'content-moderation' );
+            $moderated_forms[] = esc_html__( 'None', 'content-moderation' );
         }
 ?>
         <div>
-            <div><?php echo sprintf( __( '%s waiting for profile update approval.', 'content-moderation' ), $this->moderation_count ); ?></div>
-            <div><?php echo sprintf( __( '%s being denied their profile update.', 'content-moderation' ), $denied_count ); ?></div>
+            <div><?php echo sprintf( esc_html__( '%s waiting for profile update approval.', 'content-moderation' ), $this->moderation_count ); ?></div>
+            <div><?php echo sprintf( esc_html__( '%s being denied their profile update.', 'content-moderation' ), $denied_count ); ?></div>
             <?php
             if ( UM()->options()->get( 'um_content_moderation_delay_update' ) != 1 ) {?>
-                <div><?php echo sprintf( __( '%s with rollbacks.', 'content-moderation' ), $rollback_count ); ?></div>
+                <div><?php echo sprintf( esc_html__( '%s with rollbacks.', 'content-moderation' ), $rollback_count ); ?></div>
             <?php
             }
 
             $url = get_admin_url() . 'admin.php?page=um_options&tab=extensions&section=content-moderation';
-            $settings_link = '<a href="' . esc_url( $url ) . '">' . __( 'Plugin settings', 'content-moderation' ) . '</a>';
+            $settings_link = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Plugin settings', 'content-moderation' ) . '</a>';
 
             echo '<hr>'; ?>
             <div><?php echo $settings_link; ?></div>
-            <div><?php echo sprintf( __( 'Moderated Roles: %s', 'content-moderation' ), implode( ', ', $moderated_roles ) ); ?></div>
-            <div><?php echo sprintf( __( 'Moderated Forms: %s', 'content-moderation' ), implode( '<br>', $moderated_forms ) ); ?></div>
+            <div><?php echo sprintf( esc_html__( 'Moderated Roles: %s', 'content-moderation' ), implode( ', ', $moderated_roles ) ); ?></div>
+            <div><?php echo sprintf( esc_html__( 'Moderated Forms: %s', 'content-moderation' ), implode( '<br>', $moderated_forms ) ); ?></div>
 <?php
             clearstatcache();
             echo '<hr>';
@@ -441,13 +450,13 @@ class UM_Profile_Content_Moderation {
                 $status  = UM()->options()->get( "content_moderation_{$template}_email" . '_on' );
 
                 $url_email  = get_site_url() . "/wp-admin/admin.php?page=um_options&tab=email&email=content_moderation_{$template}_email";
-                $status  = empty( $status ) ? __( 'Email not active', 'content-moderation' ) : __( 'Email active', 'content-moderation' );
+                $status  = empty( $status ) ? esc_html__( 'Email not active', 'content-moderation' ) : esc_html__( 'Email active', 'content-moderation' );
                 $status  = sprintf( '<a href="%s">%s</a> ', esc_url( $url_email ), $status );
 
                 $located = wp_normalize_path( STYLESHEETPATH . '/ultimate-member/email/' . "content_moderation_{$template}_email" . '.php' );
-                $exists  = file_exists( $located ) ? '' : __( 'Template not found', 'content-moderation' )?>
+                $exists  = file_exists( $located ) ? '' : esc_html__( 'Template not found', 'content-moderation' )?>
 
-                <div><?php echo sprintf( __( '%s: %s %s', 'content-moderation' ), $subject, $status, $exists ); ?></div>
+                <div><?php echo sprintf( esc_html__( '%s: %s %s', 'content-moderation' ), $subject, $status, $exists ); ?></div>
 <?php       }?>
 
         </div>
@@ -465,8 +474,8 @@ class UM_Profile_Content_Moderation {
         );
 
         $button_text = ( UM()->options()->get( 'um_content_moderation_delay_update' ) == 1 ) ?
-                            __( 'Reset Moderation cache counters', 'content-moderation' ) :
-                            __( 'Reset any left User Profile update values and Moderation cache counters', 'content-moderation' );
+                        esc_html__( 'Reset Moderation cache counters', 'content-moderation' ) :
+                        esc_html__( 'Reset any left User Profile update values and Moderation cache counters', 'content-moderation' );
 ?>
         <hr>
         <p>
@@ -513,7 +522,7 @@ class UM_Profile_Content_Moderation {
         $url = add_query_arg(
             array(
                 'page'   => 'ultimatemember',
-                'update' => 'content_moderation_reset',
+                'action' => 'content_moderation_reset',
                 'result' =>  $count,
             ),
             admin_url( 'admin.php' )
@@ -529,11 +538,31 @@ class UM_Profile_Content_Moderation {
 
             if ( UM()->options()->get( 'um_content_moderation_delay_update' ) != 1 ) {
 
-                $message[0]['content'] = sprintf( __( 'Content Moderation removed %s left User Profile update values and all Moderation cache counters.', 'content-moderation' ),
-                                                        sanitize_text_field( $_REQUEST['result'] ));
+                $message[]['content'] = sprintf( esc_html__( 'Content Moderation removed %s left User Profile update values and all Moderation cache counters.', 'content-moderation' ),
+                                                                sanitize_text_field( $_REQUEST['result'] ));
             } else {
 
-                $message[0]['content'] = __( 'Content Moderation removed all Moderation cache counters.', 'content-moderation' );
+                $message[]['content'] = esc_html__( 'Content Moderation removed all Moderation cache counters.', 'content-moderation' );
+            }
+        }
+
+        if ( in_array( $update, $this->actions_list ) ) {
+
+            switch( $update ) {
+
+                case 'um_approve_profile_update':   $message[]['content'] = sprintf( esc_html__( '%d users who\'s updates were approved and their profiles were updated.', 'content-moderation' ), intval( $_REQUEST['result'] ));
+                                                    break;
+
+                case 'um_accept_profile_update':    $message[]['content'] = sprintf( esc_html__( '%d users who\'s updates were accepted.', 'content-moderation' ), intval( $_REQUEST['result'] ));
+                                                    break;
+
+                case 'um_rollback_profile_update':  $message[]['content'] = sprintf( esc_html__( '%d users profile update rollbacked to unedited status.', 'content-moderation' ), intval( $_REQUEST['result'] ));
+                                                    break;
+
+                case 'um_deny_profile_update':      $message[]['content'] = sprintf( esc_html__( '%d users denied profile update.', 'content-moderation' ), intval( $_REQUEST['result'] ));
+                                                    break;
+
+                default:                            $message[]['content'] = '';
             }
         }
 
@@ -586,7 +615,7 @@ class UM_Profile_Content_Moderation {
         }
 
         $views['moderation'] = '<a ' . $current . 'href="' . esc_url( admin_url( 'users.php' ) . '?content_moderation=awaiting_profile_review' ) . '">' .
-                                __( 'Content Moderation', 'content-moderation' ) . ' <span class="count">(' . $moderation_count . ')</span></a>';
+                                esc_html__( 'Content Moderation', 'content-moderation' ) . ' <span class="count">(' . $moderation_count . ')</span></a>';
 
         return $views;
     }
@@ -595,7 +624,7 @@ class UM_Profile_Content_Moderation {
 
         if ( isset( $_REQUEST['content_moderation'] ) && sanitize_key( $_REQUEST['content_moderation'] ) === 'awaiting_profile_review' ) {
 
-            $columns['content_moderation'] = __( 'Update/Denial', 'content-moderation' );
+            $columns['content_moderation'] = esc_html__( 'Update/Denial', 'content-moderation' );
         }
 
         return $columns;
@@ -625,7 +654,7 @@ class UM_Profile_Content_Moderation {
             $value = um_user( 'account_status_name' );
 
             if ( (int)um_user( 'um_content_moderation' ) > 1000 ) {
-                $value = __( 'Content Moderation', 'content-moderation' );
+                $value = esc_html__( 'Content Moderation', 'content-moderation' );
             }
 
             um_reset_user();
@@ -697,7 +726,7 @@ class UM_Profile_Content_Moderation {
 
         } else {
 
-            echo '<p><label>' . __( 'No access', 'content-moderation' ) . '</label></p>';
+            echo '<p><label>' . esc_html__( 'No access', 'content-moderation' ) . '</label></p>';
         }
 
         echo '</div>';
@@ -707,21 +736,21 @@ class UM_Profile_Content_Moderation {
 
         ob_start();
 
-        echo '<p><label>' . sprintf( __( 'Profile Update submitted %s by User %s', 'content-moderation' ),
-                                    date( 'Y-m-d H:i:s', um_user( 'um_content_moderation' )), um_user( 'user_login' )) . '</label></p>';
+        echo '<p><label>' . sprintf( esc_html__( 'Profile Update submitted %s by User %s', 'content-moderation' ),
+                                           date( 'Y-m-d H:i:s', um_user( 'um_content_moderation' )), um_user( 'user_login' )) . '</label></p>';
 
         $um_denial_profile_updates = um_user( 'um_denial_profile_updates' );
         if ( ! empty( $um_denial_profile_updates ) && (int)$um_denial_profile_updates > 0 ) {
-            echo '<p><label>' . sprintf( __( 'Profile Update Denial sent %s', 'content-moderation' ),
-                                        date( 'Y-m-d H:i:s', $um_denial_profile_updates )) . '</label></p>';
+            echo '<p><label>' . sprintf( esc_html__( 'Profile Update Denial sent %s', 'content-moderation' ),
+                                               date( 'Y-m-d H:i:s', $um_denial_profile_updates )) . '</label></p>';
         }
 
         if ( ! $this->content_moderation_action( um_user( 'ID' )) ) {
 
             $um_rollback_profile_updates = um_user( 'um_rollback_profile_updates' );
             if ( ! empty( $um_rollback_profile_updates ) && (int)$um_rollback_profile_updates > 0 ) {
-                echo '<p><label>' . sprintf( __( 'Last Profile Rollback of updates %s', 'content-moderation' ),
-                                            date( 'Y-m-d H:i:s', $um_rollback_profile_updates )) . '</label></p>';
+                echo '<p><label>' . sprintf( esc_html__( 'Last Profile Rollback of updates %s', 'content-moderation' ),
+                                                   date( 'Y-m-d H:i:s', $um_rollback_profile_updates )) . '</label></p>';
             }
         }
 
@@ -729,8 +758,8 @@ class UM_Profile_Content_Moderation {
 
         if ( ! empty( $diff_updates ) && is_array( $diff_updates )) {
 
-            $old = __( 'Old:', 'content-moderation' );
-            $new = __( 'New:', 'content-moderation' );
+            $old = esc_html__( 'Old:', 'content-moderation' );
+            $new = esc_html__( 'New:', 'content-moderation' );
 
             $output = array();
 
@@ -741,22 +770,22 @@ class UM_Profile_Content_Moderation {
                 if ( is_array( $meta_value )) {
 
                     $field = UM()->builtin()->get_a_field( $meta_key );
-                    $title = isset( $field['title'] ) ? esc_attr( $field['title'] ) : __( 'No text', 'content-moderation' );
+                    $title = isset( $field['title'] ) ? esc_attr( $field['title'] ) : esc_html__( 'No text', 'content-moderation' );
 
                     if ( in_array( $meta_key, $this->not_update_user_keys )) {
-                        $title .= '<span title="' . sprintf( __( 'No rollback possible for the meta_key %s', 'content-moderation' ), $meta_key ) . '" style="color: red;"> *</span>';
+                        $title .= '<span title="' . sprintf( esc_html__( 'No rollback possible for the meta_key %s', 'content-moderation' ), $meta_key ) . '" style="color: red;"> *</span>';
                     }
 
                     if ( empty( $meta_value['old'] ) || empty( $meta_value['new'] )) {
 
                         if ( empty( $meta_value['old'] )) {
-                            $text_old = __( '(empty)', 'content-moderation' );
+                            $text_old = esc_html__( '(empty)', 'content-moderation' );
                         } else {
                             $text_old = $meta_value['old'];
                         }
 
                         if ( empty( $meta_value['new'] )) {
-                            $text_new = __( '(empty)', 'content-moderation' );
+                            $text_new = esc_html__( '(empty)', 'content-moderation' );
                         } else {
                             $text_new = $meta_value['new'];
                         }
@@ -832,7 +861,7 @@ class UM_Profile_Content_Moderation {
                             }
 
                             if ( $text_old == $text_new ) {
-                                $text_new = __( 'Format changes only', 'content-moderation' );
+                                $text_new = esc_html__( 'Format changes only', 'content-moderation' );
                             }
 
                         }
@@ -850,8 +879,8 @@ class UM_Profile_Content_Moderation {
 
             } else {
 
-                echo '<p><label>' . __( 'No updates found', 'content-moderation' ) . '</label></p>';
-                echo '<p><label>' . __( 'Image/File updates are not logged at the moment.', 'content-moderation' ) . '</label></p>';
+                echo '<p><label>' . esc_html__( 'No updates found', 'content-moderation' ) . '</label></p>';
+                echo '<p><label>' . esc_html__( 'Image/File updates are not logged at the moment.', 'content-moderation' ) . '</label></p>';
             }
         }
 
@@ -884,7 +913,7 @@ class UM_Profile_Content_Moderation {
             $actions['view_info_update'] = '<a href="javascript:void(0);" data-modal="UM_preview_profile_update"
                                             data-modal-size="smaller" data-dynamic-content="content_moderation_review_update"
                                             data-arg1="' . esc_attr( $user_id ) . '" data-arg2="profile_updates">' .
-                                            __( 'Moderation', 'content-moderation' ) .  '</a>';
+                                            esc_html__( 'Moderation', 'content-moderation' ) .  '</a>';
         }
 
         return $actions;
@@ -935,7 +964,7 @@ class UM_Profile_Content_Moderation {
 
         if ( ! empty( $um_content_moderation_forms )) {
             $um_content_moderation_forms = array_map( 'sanitize_text_field', $um_content_moderation_forms );
-            
+
             if ( isset( $_POST['form_id'] ) && ! empty( $_POST['form_id'] )) {
                 $form_id = sanitize_text_field( $_POST['form_id'] );
             } else {
@@ -960,7 +989,7 @@ class UM_Profile_Content_Moderation {
 
     public function um_profile_update_content_moderation( $redirect, $doaction, $user_ids ) {
 
-        if ( strpos( $redirect, 'content_moderation' ) !== false ) {
+        if ( in_array( $doaction, $this->actions_list ) ) {
 
             if ( is_array( $user_ids ) && ! empty( $user_ids )) {
 
@@ -990,7 +1019,23 @@ class UM_Profile_Content_Moderation {
                     default:                            return;
                 }
 
-                $this->redirect_to_content_moderation( $user_ids );
+                foreach( $user_ids as $user_id ) {
+                    UM()->user()->remove_cache( $user_id );
+                    um_fetch_user( $user_id );
+                }
+
+                $url = add_query_arg(
+                    array(
+                            'update'             => $doaction,
+                            'content_moderation' => 'awaiting_profile_review',
+                            'result'             => count( $user_ids ),
+                            '_wpnonce'           => wp_create_nonce( $doaction ),
+                    ),
+                    admin_url( 'users.php' )
+                );
+
+                wp_safe_redirect( $url );
+                exit;
             }
 
             return $this->redirect_to_content_moderation();
@@ -1278,9 +1323,9 @@ class UM_Profile_Content_Moderation {
 
         $url = esc_url( admin_url( 'users.php' ) . '?content_moderation=awaiting_profile_review' );
 
-        add_submenu_page( 'ultimatemember', __( 'Content Moderation', 'content-moderation' ),
-                                            __( 'Content Moderation', 'content-moderation' ) . sprintf( ' (%d)', intval( $this->count_content_values( 'um_content_moderation' ) )),
-                                                'manage_options', $url , '' );
+        add_submenu_page( 'ultimatemember', esc_html__( 'Content Moderation', 'content-moderation' ),
+                                            esc_html__( 'Content Moderation', 'content-moderation' ) . sprintf( ' (%d)', intval( $this->count_content_values( 'um_content_moderation' ) )),
+                                                        'manage_options', $url , '' );
     }
 
     public function um_user_pre_updating_profile_save_before_after( $to_update, $user_id ) {
@@ -1376,7 +1421,7 @@ class UM_Profile_Content_Moderation {
 //*********
     public function get_possible_plugin_update( $plugin ) {
 
-        $update = __( 'Plugin version update failure', 'content-moderation' );
+        $update = esc_html__( 'Plugin version update failure', 'content-moderation' );
         $transient = get_transient( $plugin );
 
         if ( is_array( $transient ) && isset( $transient['status'] )) {
@@ -1410,20 +1455,20 @@ class UM_Profile_Content_Moderation {
 
                             switch( $this->validate_new_plugin_version( $plugin_data, $content ) ) {
 
-                                case 0:     $update = __( 'Plugin version update verification failed', 'content-moderation' );
+                                case 0:     $update = esc_html__( 'Plugin version update verification failed', 'content-moderation' );
                                             break;
                                 case 1:     $update = '<a href="' . esc_url( $plugin_data['UpdateURI'] ) . '" target="_blank">';
-                                            $update = sprintf( __( 'Update to %s plugin version %s%s is now available for download.', 'content-moderation' ), $update, esc_attr( $this->new_plugin_version ), '</a>' );
+                                            $update = sprintf( esc_html__( 'Update to %s plugin version %s%s is now available for download.', 'content-moderation' ), $update, esc_attr( $this->new_plugin_version ), '</a>' );
                                             break;
-                                case 2:     $update = sprintf( __( 'Plugin is updated to the latest version %s.', 'content-moderation' ), esc_attr( $plugin_data['Version'] ));
+                                case 2:     $update = sprintf( esc_html__( 'Plugin is updated to the latest version %s.', 'content-moderation' ), esc_attr( $plugin_data['Version'] ));
                                             break;
-                                case 3:     $update = __( 'Unknown encoding format returned from GitHub', 'content-moderation' );
+                                case 3:     $update = esc_html__( 'Unknown encoding format returned from GitHub', 'content-moderation' );
                                             break;
-                                case 4:     $update = __( 'Version number not found', 'content-moderation' );
+                                case 4:     $update = esc_html__( 'Version number not found', 'content-moderation' );
                                             break;
-                                case 5:     $update = sprintf( __( 'Update to plugin version %s is now available for download from GitHub.', 'content-moderation' ), esc_attr( $this->new_plugin_version ));
+                                case 5:     $update = sprintf( esc_html__( 'Update to plugin version %s is now available for download from GitHub.', 'content-moderation' ), esc_attr( $this->new_plugin_version ));
                                             break;
-                                default:    $update = __( 'Plugin version update validation failure', 'content-moderation' );
+                                default:    $update = esc_html__( 'Plugin version update validation failure', 'content-moderation' );
                                             break;
                             }
 
@@ -1431,12 +1476,12 @@ class UM_Profile_Content_Moderation {
 
                                 $update .= sprintf( ' <a href="%s" target="_blank" title="%s">%s</a>',
                                                             esc_url( $plugin_data['PluginURI'] ),
-                                                            __( 'GitHub plugin documentation and download', 'content-moderation' ),
-                                                            __( 'Plugin documentation', 'content-moderation' ));
+                                                            esc_html__( 'GitHub plugin documentation and download', 'content-moderation' ),
+                                                            esc_html__( 'Plugin documentation', 'content-moderation' ));
                             }
 
                             $today = date_i18n( 'Y/m/d H:i:s', current_time( 'timestamp' ));
-                            $update .= '<br />' . sprintf( __( 'Github plugin version status is checked each 24 hours last at %s.', 'content-moderation' ), esc_attr( $today ));
+                            $update .= '<br />' . sprintf( esc_html__( 'Github plugin version status is checked each 24 hours last at %s.', 'content-moderation' ), esc_attr( $today ));
 
                             set_transient( $plugin,
                                             array( 'status'       => $update,
@@ -1445,11 +1490,11 @@ class UM_Profile_Content_Moderation {
                                         );
 
                         } else {
-                            $update = sprintf( __( 'GitHub remote connection cURL error: %s', 'content-moderation' ), $error );
+                            $update = sprintf( esc_html__( 'GitHub remote connection cURL error: %s', 'content-moderation' ), $error );
                         }
 
                     } else {
-                        $update = __( 'cURL extension not loaded by PHP', 'content-moderation' );
+                        $update = esc_html__( 'cURL extension not loaded by PHP', 'content-moderation' );
                     }
                 }
             }
@@ -1514,7 +1559,7 @@ class UM_Profile_Content_Moderation {
         if ( isset( $_REQUEST['page'] ) && $_REQUEST['page'] == 'um_options' ) {
             if ( isset( $_REQUEST['tab'] ) && $_REQUEST['tab'] == 'extensions' ) {
 
-                $settings['extensions']['sections']['content-moderation']['title'] = __( 'Profile Content Moderation', 'content-moderation' );
+                $settings['extensions']['sections']['content-moderation']['title'] = esc_html__( 'Profile Content Moderation', 'content-moderation' );
 
                 if ( ! isset( $_REQUEST['section'] ) || $_REQUEST['section'] == 'content-moderation' ) {
 
@@ -1536,8 +1581,8 @@ class UM_Profile_Content_Moderation {
 
         $link = sprintf( '<a href="%s" target="_blank" title="%s">%s</a>',
                                         esc_url( $plugin_data['PluginURI'] ),
-                                    __( 'GitHub plugin documentation and download', 'content-moderation' ),
-                                    __( 'Plugin', 'content-moderation' ));
+                                        esc_html__( 'GitHub plugin documentation and download', 'content-moderation' ),
+                                        esc_html__( 'Plugin', 'content-moderation' ));
 
         $notification_emails = array();
         $emails = UM()->config()->email_notifications;
@@ -1551,7 +1596,7 @@ class UM_Profile_Content_Moderation {
         $section_fields[] = array(
                 'id'             => 'content_moderation_header',
                 'type'           => 'header',
-                'label'          => __( 'Moderation Forms & Roles', 'content-moderation' ),
+                'label'          => esc_html__( 'Moderation Forms & Roles', 'content-moderation' ),
         );
 
             $section_fields[] = array(
@@ -1560,16 +1605,16 @@ class UM_Profile_Content_Moderation {
                     'multi'          => true,
                     'size'           => 'medium',
                     'options'        => $this->profile_forms,
-                    'label'          => $prefix . __( 'Profile Forms to Moderate', 'content-moderation' ),
-                    'description'    => __( 'Select single or multiple Profile Forms for Content Moderation.', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'Profile Forms to Moderate', 'content-moderation' ),
+                    'description'    => esc_html__( 'Select single or multiple Profile Forms for Content Moderation.', 'content-moderation' ),
                 );
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_roles',
                     'type'           => 'select',
                     'multi'          => true,
-                    'label'          => $prefix . __( 'User Roles to Moderate', 'content-moderation' ),
-                    'description'    => __( 'Select the User Role(s) to be included in Content Moderation.', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'User Roles to Moderate', 'content-moderation' ),
+                    'description'    => esc_html__( 'Select the User Role(s) to be included in Content Moderation.', 'content-moderation' ),
                     'options'        => UM()->roles()->get_roles(),
                     'size'           => 'medium',
                 );
@@ -1577,61 +1622,61 @@ class UM_Profile_Content_Moderation {
         $section_fields[] = array(
             'id'             => 'content_moderation_header',
             'type'           => 'header',
-            'label'          => __( 'UM Dashboard', 'content-moderation' ),
+            'label'          => esc_html__( 'UM Dashboard', 'content-moderation' ),
         );
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_modal_list',
                     'type'           => 'checkbox',
-                    'label'          => $prefix . __( 'UM Dashboard Modal', 'content-moderation' ),
-                    'checkbox_label' => __( 'Click to enable the UM Dashboard modal for Content Moderation.', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'UM Dashboard Modal', 'content-moderation' ),
+                    'checkbox_label' => esc_html__( 'Click to enable the UM Dashboard modal for Content Moderation.', 'content-moderation' ),
                 );
 
         $section_fields[] = array(
             'id'             => 'content_moderation_header',
             'type'           => 'header',
-            'label'          => __( 'User Info', 'content-moderation' ),
+            'label'          => esc_html__( 'User Info', 'content-moderation' ),
         );
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_update_status',
                     'type'           => 'checkbox',
-                    'label'          => $prefix . __( 'Enable User Update Status', 'content-moderation' ),
-                    'checkbox_label' => __( 'Click to enable a "days since update" colored Profile circle after the Profile page User name.', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'Enable User Update Status', 'content-moderation' ),
+                    'checkbox_label' => esc_html__( 'Click to enable a "days since update" colored Profile circle after the Profile page User name.', 'content-moderation' ),
                 );
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_update_colors',
                     'type'           => 'text',
-                    'label'          => $prefix . __( 'Enter colors for the Profile circle', 'content-moderation' ),
-                    'description'    => __( 'Enter colors either by color name or HEX code comma separated for each day\'s display of the "days since update" Profile circle.', 'content-moderation' ) . '<br />' .
-                                        __( 'Default color is "white" and is displayed for 7 days.', 'content-moderation' ) . ' <a href="https://www.w3schools.com/colors/colors_groups.asp" target="_blank">W3Schools HTML Color Groups</a>',
+                    'label'          => $prefix . esc_html__( 'Enter colors for the Profile circle', 'content-moderation' ),
+                    'description'    => esc_html__( 'Enter colors either by color name or HEX code comma separated for each day\'s display of the "days since update" Profile circle.', 'content-moderation' ) . '<br />' .
+                                        esc_html__( 'Default color is "white" and is displayed for 7 days.', 'content-moderation' ) . ' <a href="https://www.w3schools.com/colors/colors_groups.asp" target="_blank">W3Schools HTML Color Groups</a>',
                     'conditional'    => array( 'um_content_moderation_update_status', '=', 1 ),
                 );
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_update_opacity',
                     'type'           => 'checkbox',
-                    'label'          => $prefix . __( 'Enable transparency increase for the Profile circle', 'content-moderation' ),
-                    'checkbox_label' => __( 'Click to enable increased transparency of the "days since update" Profile circle for each day after approved update.', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'Enable transparency increase for the Profile circle', 'content-moderation' ),
+                    'checkbox_label' => esc_html__( 'Click to enable increased transparency of the "days since update" Profile circle for each day after approved update.', 'content-moderation' ),
                     'conditional'    => array( 'um_content_moderation_update_status', '=', 1 ),
                 );
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_update_size',
                     'type'           => 'text',
-                    'label'          => $prefix . __( 'Enter size in pixels for the Profile circle', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'Enter size in pixels for the Profile circle', 'content-moderation' ),
                     'size'           => 'small',
-                    'description'    => __( 'Enter size in pixels for the "days since update" Profile circle. Default value is 24 pixels.', 'content-moderation' ),
+                    'description'    => esc_html__( 'Enter size in pixels for the "days since update" Profile circle. Default value is 24 pixels.', 'content-moderation' ),
                     'conditional'    => array( 'um_content_moderation_update_status', '=', 1 ),
                 );
 
         $section_fields[] = array(
                 'id'             => 'content_moderation_header',
                 'type'           => 'header',
-                'label'          => __( 'Moderation Process', 'content-moderation' ),
-                'description'    => __( 'Default: User set to UM "Admin Review" status with Profile updated.', 'content-moderation' ) . '<br />' .
-                                    __( 'Option from version 3.6.0: Delayed Profile update until approved by a site Moderator.', 'content-moderation' ) . '<br />',
+                'label'          => esc_html__( 'Moderation Process', 'content-moderation' ),
+                'description'    => esc_html__( 'Default: User set to UM "Admin Review" status with Profile updated.', 'content-moderation' ) . '<br />' .
+                                    esc_html__( 'Option from version 3.6.0: Delayed Profile update until approved by a site Moderator.', 'content-moderation' ) . '<br />',
             );
 
             if ( intval( $this->count_content_values( 'um_content_moderation' )) == 0 ) {
@@ -1639,22 +1684,22 @@ class UM_Profile_Content_Moderation {
                 $section_fields[] = array(
                         'id'             => 'um_content_moderation_delay_update',
                         'type'           => 'checkbox',
-                        'label'          => $prefix . __( 'Delay User Profile update during Moderation', 'content-moderation' ),
-                        'checkbox_label' => __( 'Click to enable the delay of the User Profile update until approved by a site Moderator.', 'content-moderation' ),
+                        'label'          => $prefix . esc_html__( 'Delay User Profile update during Moderation', 'content-moderation' ),
+                        'checkbox_label' => esc_html__( 'Click to enable the delay of the User Profile update until approved by a site Moderator.', 'content-moderation' ),
                     );
 
             } else {
 
                 $description = ( UM()->options()->get( 'um_content_moderation_delay_update' ) == 1 ) ?
-                                                        __( 'Option is enabled', 'content-moderation' ) :
-                                                        __( 'Option is disabled', 'content-moderation' );
+                                            esc_html__( 'Option is enabled', 'content-moderation' ) :
+                                            esc_html__( 'Option is disabled', 'content-moderation' );
 
                 $section_fields[] = array(
                     'id'             => 'content_moderation_header',
                     'type'           => 'header',
-                    'label'          => $prefix . __( 'Delay User Profile update during Moderation', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'Delay User Profile update during Moderation', 'content-moderation' ),
                     'description'    => $description . '<br />' .
-                                        __( 'Settings are only displayed for changes when the queue of users waiting for approval is empty.', 'content-moderation' ),
+                                        esc_html__( 'Settings are only displayed for changes when the queue of users waiting for approval is empty.', 'content-moderation' ),
                 );
             }
 
@@ -1663,10 +1708,10 @@ class UM_Profile_Content_Moderation {
                 $section_fields[] = array(
                         'id'             => 'um_content_moderation_delay_url',
                         'type'           => 'text',
-                        'label'          => $prefix . __( 'Delay User Profile update URL at the Cog wheel menu', 'content-moderation' ),
-                        'description'    => __( 'Enter an URL to a page where you explain the Content Moderation with delayed update procedure at your site.', 'content-moderation' ) . '<br />' .
-                                            __( 'Link replaces "Edit Profile" when user is awaiting Content Moderation.', 'content-moderation' ) . '<br />' .
-                                            __( 'Blank URL disables link and "Edit Profile" text.', 'content-moderation' ),
+                        'label'          => $prefix . esc_html__( 'Delay User Profile update URL at the Cog wheel menu', 'content-moderation' ),
+                        'description'    => esc_html__( 'Enter an URL to a page where you explain the Content Moderation with delayed update procedure at your site.', 'content-moderation' ) . '<br />' .
+                                            esc_html__( 'Link replaces "Edit Profile" when user is awaiting Content Moderation.', 'content-moderation' ) . '<br />' .
+                                            esc_html__( 'Blank URL disables link and "Edit Profile" text.', 'content-moderation' ),
                         'size'           => 'medium',
                         'conditional'    => array( 'um_content_moderation_delay_update', '=', 1 ),
                     );
@@ -1674,8 +1719,8 @@ class UM_Profile_Content_Moderation {
                 $section_fields[] = array(
                         'id'             => 'um_content_moderation_delay_url_text',
                         'type'           => 'text',
-                        'label'          => $prefix . __( 'Delay User Profile update text at the Cog wheel menu', 'content-moderation' ),
-                        'description'    => __( 'Enter a short URL text message. Default text is "Why Content Moderation".', 'content-moderation' ),
+                        'label'          => $prefix . esc_html__( 'Delay User Profile update text at the Cog wheel menu', 'content-moderation' ),
+                        'description'    => esc_html__( 'Enter a short URL text message. Default text is "Why Content Moderation".', 'content-moderation' ),
                         'size'           => 'medium',
                         'conditional'    => array( 'um_content_moderation_delay_url', '!=', '' ),
                     );
@@ -1686,96 +1731,96 @@ class UM_Profile_Content_Moderation {
                 $section_fields[] = array(
                         'id'             => 'um_content_moderation_disable_logincheck',
                         'type'           => 'checkbox',
-                        'label'          => $prefix . __( 'Allow Users Login', 'content-moderation' ),
-                        'checkbox_label' => __( 'Click to disable UM status logincheck of Users not approved yet in Content Moderation.', 'content-moderation' ),
+                        'label'          => $prefix . esc_html__( 'Allow Users Login', 'content-moderation' ),
+                        'checkbox_label' => esc_html__( 'Click to disable UM status logincheck of Users not approved yet in Content Moderation.', 'content-moderation' ),
                         'conditional'    => array( 'um_content_moderation_delay_update', '!=', 1 ),
                     );
 
                 $section_fields[] = array(
                         'id'             => 'um_content_moderation_admin_disable',
                         'type'           => 'checkbox',
-                        'label'          => $prefix . __( 'Disable Admin updates Moderation', 'content-moderation' ),
-                        'checkbox_label' => __( 'Click to disable Admin updates of Users from Content Moderation.', 'content-moderation' ),
+                        'label'          => $prefix . esc_html__( 'Disable Admin updates Moderation', 'content-moderation' ),
+                        'checkbox_label' => esc_html__( 'Click to disable Admin updates of Users from Content Moderation.', 'content-moderation' ),
                     );
             }
 
         $section_fields[] = array(
                 'id'             => 'content_moderation_header',
                 'type'           => 'header',
-                'label'          => __( 'Registration Approval', 'content-moderation' ),
+                'label'          => esc_html__( 'Registration Approval', 'content-moderation' ),
             );
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_double_optin',
                     'type'           => 'checkbox',
-                    'label'          => $prefix . __( 'Enable Email Activation plus Admin Review', 'content-moderation' ),
-                    'checkbox_label' => __( 'Click to enable Admin Review after successful Email Activation by the User.', 'content-moderation' ),
-                    'description'    => __( 'UM Setting Registration email Activation must be set in advance.', 'content-moderation' ),
+                    'label'          => $prefix . esc_html__( 'Enable Email Activation plus Admin Review', 'content-moderation' ),
+                    'checkbox_label' => esc_html__( 'Click to enable Admin Review after successful Email Activation by the User.', 'content-moderation' ),
+                    'description'    => esc_html__( 'UM Setting Registration email Activation must be set in advance.', 'content-moderation' ),
                 );
 
         $section_fields[] = array(
                 'id'             => 'content_moderation_header',
                 'type'           => 'header',
-                'label'          => __( 'Email Templates', 'content-moderation' ),
+                'label'          => esc_html__( 'Email Templates', 'content-moderation' ),
             );
 
             $url_email  = get_site_url() . "/wp-admin/admin.php?page=um_options&tab=email&email=" . UM()->options()->get( 'um_content_moderation_pending_user_email' );
-            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), __( 'Email settings', 'content-moderation' ));
+            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), esc_html__( 'Email settings', 'content-moderation' ));
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_pending_user_email',
                     'type'           => 'select',
-                    'label'          => $prefix . __( 'User Pending Notification', 'content-moderation' ),
-                    'description'    => __( 'Select the User Pending Notification Email template.', 'content-moderation' ) . $settings,
+                    'label'          => $prefix . esc_html__( 'User Pending Notification', 'content-moderation' ),
+                    'description'    => esc_html__( 'Select the User Pending Notification Email template.', 'content-moderation' ) . $settings,
                     'options'        => $notification_emails,
                     'size'           => 'medium',
                 );
 
             $url_email  = get_site_url() . "/wp-admin/admin.php?page=um_options&tab=email&email=" . UM()->options()->get( 'um_content_moderation_accept_user_email' );
-            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), __( 'Email settings', 'content-moderation' ));
+            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), esc_html__( 'Email settings', 'content-moderation' ));
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_accept_user_email',
                     'type'           => 'select',
-                    'label'          => $prefix . __( 'User Accept Notification', 'content-moderation' ),
-                    'description'    => __( 'Select the User Accept Notification Email template.', 'content-moderation' ) . $settings,
+                    'label'          => $prefix . esc_html__( 'User Accept Notification', 'content-moderation' ),
+                    'description'    => esc_html__( 'Select the User Accept Notification Email template.', 'content-moderation' ) . $settings,
                     'options'        => $notification_emails,
                     'size'           => 'medium',
                 );
 
             $url_email  = get_site_url() . "/wp-admin/admin.php?page=um_options&tab=email&email=" . UM()->options()->get( 'um_content_moderation_denial_user_email' );
-            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), __( 'Email settings', 'content-moderation' ));
+            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), esc_html__( 'Email settings', 'content-moderation' ));
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_denial_user_email',
                     'type'           => 'select',
-                    'label'          => $prefix . __( 'User Denial Notification', 'content-moderation' ),
-                    'description'    => __( 'Select the User Denial Notification Email template.', 'content-moderation' ) . $settings,
+                    'label'          => $prefix . esc_html__( 'User Denial Notification', 'content-moderation' ),
+                    'description'    => esc_html__( 'Select the User Denial Notification Email template.', 'content-moderation' ) . $settings,
                     'options'        => $notification_emails,
                     'size'           => 'medium',
                 );
 
             $url_email  = get_site_url() . "/wp-admin/admin.php?page=um_options&tab=email&email=" . UM()->options()->get( 'um_content_moderation_rollback_user_email' );
-            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), __( 'Email settings', 'content-moderation' ));
+            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), esc_html__( 'Email settings', 'content-moderation' ));
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_rollback_user_email',
                     'type'           => 'select',
-                    'label'          => $prefix . __( 'User Rollback Notification', 'content-moderation' ),
-                    'description'    => __( 'Select the User Rollback Notification Email template.', 'content-moderation' ) . $settings,
+                    'label'          => $prefix . esc_html__( 'User Rollback Notification', 'content-moderation' ),
+                    'description'    => esc_html__( 'Select the User Rollback Notification Email template.', 'content-moderation' ) . $settings,
                     'options'        => $notification_emails,
                     'size'           => 'medium',
                     'conditional'    => array( 'um_content_moderation_delay_update', '!=', 1 ),
                 );
 
             $url_email  = get_site_url() . "/wp-admin/admin.php?page=um_options&tab=email&email=" . UM()->options()->get( 'um_content_moderation_admin_email' );
-            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), __( 'Email settings', 'content-moderation' ));
+            $settings = sprintf( ' <a href="%s">%s</a>', esc_url( $url_email ), esc_html__( 'Email settings', 'content-moderation' ));
 
             $section_fields[] = array(
                     'id'             => 'um_content_moderation_admin_email',
                     'type'           => 'select',
-                    'label'          => $prefix . __( 'Admin Notification', 'content-moderation' ),
-                    'description'    => __( 'Select the Admin Notification Email template.', 'content-moderation' ) . $settings,
+                    'label'          => $prefix . esc_html__( 'Admin Notification', 'content-moderation' ),
+                    'description'    => esc_html__( 'Select the Admin Notification Email template.', 'content-moderation' ) . $settings,
                     'options'        => $notification_emails,
                     'size'           => 'medium',
                 );
@@ -1786,12 +1831,12 @@ class UM_Profile_Content_Moderation {
     public function um_email_notification_profile_content_moderation( $um_emails ) {
 
         $url = get_admin_url() . 'admin.php?page=um_options&tab=extensions&section=content-moderation';
-        $settings_link = ' <a href="' . esc_url( $url ) . '">' . __( 'Plugin settings', 'content-moderation' ) . '</a>';
+        $settings_link = ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Plugin settings', 'content-moderation' ) . '</a>';
 
         $custom_emails = array(	'content_moderation_pending_user_email' => array(
                                         'key'            => 'content_moderation_pending_user_email',
-                                        'title'          => __( 'Content Moderation - User Pending Notification', 'content-moderation' ),
-                                        'description'    => __( 'User Pending Notification Email template', 'content-moderation' ) . $settings_link,
+                                        'title'          => esc_html__( 'Content Moderation - User Pending Notification', 'content-moderation' ),
+                                        'description'    => esc_html__( 'User Pending Notification Email template', 'content-moderation' ) . $settings_link,
                                         'recipient'      => 'user',
                                         'default_active' => true,
                                         'subject'        => '[{site_name}] Profile review pending',
@@ -1800,8 +1845,8 @@ class UM_Profile_Content_Moderation {
 
                                 'content_moderation_accept_user_email' => array(
                                         'key'            => 'content_moderation_accept_user_email',
-                                        'title'          => __( 'Content Moderation - User Accept Notification', 'content-moderation' ),
-                                        'description'    => __( 'User Accepted Notification Email template', 'content-moderation' ) . $settings_link,
+                                        'title'          => esc_html__( 'Content Moderation - User Accept Notification', 'content-moderation' ),
+                                        'description'    => esc_html__( 'User Accepted Notification Email template', 'content-moderation' ) . $settings_link,
                                         'recipient'      => 'user',
                                         'default_active' => true,
                                         'subject'        => '[{site_name}] Profile is accepted',
@@ -1810,8 +1855,8 @@ class UM_Profile_Content_Moderation {
 
                                 'content_moderation_denial_user_email' => array(
                                         'key'            => 'content_moderation_denial_user_email',
-                                        'title'          => __( 'Content Moderation - User Denial Notification', 'content-moderation' ),
-                                        'description'    => __( 'User Denial Notification Email template', 'content-moderation' ) . $settings_link,
+                                        'title'          => esc_html__( 'Content Moderation - User Denial Notification', 'content-moderation' ),
+                                        'description'    => esc_html__( 'User Denial Notification Email template', 'content-moderation' ) . $settings_link,
                                         'recipient'      => 'user',
                                         'default_active' => true,
                                         'subject'        => '[{site_name}] Profile is denied',
@@ -1820,8 +1865,8 @@ class UM_Profile_Content_Moderation {
 
                                 'content_moderation_rollback_user_email' => array(
                                         'key'            => 'content_moderation_rollback_user_email',
-                                        'title'          => __( 'Content Moderation - User Rollback Notification', 'content-moderation' ),
-                                        'description'    => __( 'User Rollback Notification Email template', 'content-moderation' ) . $settings_link,
+                                        'title'          => esc_html__( 'Content Moderation - User Rollback Notification', 'content-moderation' ),
+                                        'description'    => esc_html__( 'User Rollback Notification Email template', 'content-moderation' ) . $settings_link,
                                         'recipient'      => 'user',
                                         'default_active' => true,
                                         'subject'        => '[{site_name}] Profile rollback',
@@ -1830,8 +1875,8 @@ class UM_Profile_Content_Moderation {
 
                                 'content_moderation_pending_admin_email' => array(
                                         'key'            => 'content_moderation_pending_admin_email',
-                                        'title'          => __( 'Content Moderation - Admin Pending Notification', 'content-moderation' ),
-                                        'description'    => __( 'Admin Pending Notification Email template', 'content-moderation' ) . $settings_link,
+                                        'title'          => esc_html__( 'Content Moderation - Admin Pending Notification', 'content-moderation' ),
+                                        'description'    => esc_html__( 'Admin Pending Notification Email template', 'content-moderation' ) . $settings_link,
                                         'recipient'      => 'admin',
                                         'default_active' => true,
                                         'subject'        => '[{site_name}] Profile is updated',
@@ -1842,10 +1887,6 @@ class UM_Profile_Content_Moderation {
         if ( UM()->options()->get( 'um_content_moderation_delay_update' ) == 1 ) {
             unset( $custom_emails['content_moderation_rollback_user_email'] );
         }
-
-        //$UM_class = new Options();
-        //$reflectionProperty = new \ReflectionProperty( Options::class, 'options' );
-        //$reflectionProperty->setAccessible( true );
 
         foreach ( $custom_emails as $slug => $custom_email ) {
 
@@ -1859,14 +1900,6 @@ class UM_Profile_Content_Moderation {
 
                 UM()->options()->update( $slug . '_sub', $custom_email['subject'] );
             }
-
-            //if ( ! array_key_exists( $slug . '_on', $reflectionProperty->getValue( $UM_class ) ) ) {
-
-            //    $UM_options = $reflectionProperty->getValue( $UM_class );
-            //    $UM_options[ $slug . '_on' ]  = empty( $custom_email['default_active'] ) ? 0 : 1;
-            //    $UM_options[ $slug . '_sub' ] = $custom_email['subject'];
-            //    $reflectionProperty->setValue( $UM_class, $UM_options );
-            //}
 
             $this->slugs[] = $slug;
         }
@@ -1947,4 +1980,6 @@ class UM_Profile_Content_Moderation {
 }
 
 new UM_Profile_Content_Moderation();
+
+
 
