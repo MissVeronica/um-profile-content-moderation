@@ -1,4 +1,4 @@
-# UM Profile Content Moderation version 3.7.0
+# UM Profile Content Moderation version 3.7.1
 
 Extension to Ultimate Member for Profile Content Moderation. 
 User Profile edit will set the User into Admin Review which the Admin can release and accept or deny the Profile updates. 
@@ -91,6 +91,7 @@ Settings are only displayed for changes when the queue of users waiting for appr
 17. Version 3.6.1 Fix when the plugin is the first UM Extension
 18. Version 3.6.3 Support for "Admin User Profile updates" in "Delayed User Profile update" mode
 19. Version 3.7.0 Support for UM 2.8.7. New design of UM Bulk User Actions. Fix for issue Profiles with Roles not selected for moderation when delayed update is active.
+20. Version 3.7.1 Update for conflict in UM Bulk User Actions and Admin notices. Code improvements.
 
 ## Account File Manager
 1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
