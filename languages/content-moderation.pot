@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ultimate Member - Profile Content Moderation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-01 15:39+0000\n"
+"POT-Creation-Date: 2024-10-04 13:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -16,230 +16,246 @@ msgstr ""
 "X-Loco-Version: 2.6.11; wp-6.6.2\n"
 "X-Domain: content-moderation"
 
-#: um-profile-content-moderation.php:369
+#: um-profile-content-moderation.php:378
 msgid "%d users"
 msgstr ""
 
-#: um-profile-content-moderation.php:416
+#: um-profile-content-moderation.php:562
+msgid "%d users denied profile update."
+msgstr ""
+
+#: um-profile-content-moderation.php:559
+msgid "%d users profile update rollbacked to unedited status."
+msgstr ""
+
+#: um-profile-content-moderation.php:556
+msgid "%d users who's updates were accepted."
+msgstr ""
+
+#: um-profile-content-moderation.php:553
+msgid "%d users who's updates were approved and their profiles were updated."
+msgstr ""
+
+#: um-profile-content-moderation.php:425
 #, php-format
 msgid "%s being denied their profile update."
 msgstr ""
 
-#: um-profile-content-moderation.php:415
+#: um-profile-content-moderation.php:424
 #, php-format
 msgid "%s waiting for profile update approval."
 msgstr ""
 
-#: um-profile-content-moderation.php:419
+#: um-profile-content-moderation.php:428
 #, php-format
 msgid "%s with rollbacks."
 msgstr ""
 
-#: um-profile-content-moderation.php:450
+#: um-profile-content-moderation.php:459
 #, php-format
 msgid "%s: %s %s"
 msgstr ""
 
-#: um-profile-content-moderation.php:753 um-profile-content-moderation.php:759
+#: um-profile-content-moderation.php:782 um-profile-content-moderation.php:788
 msgid "(empty)"
 msgstr ""
 
-#: um-profile-content-moderation.php:915
+#: um-profile-content-moderation.php:944
 msgid "Accept Profile Update"
 msgstr ""
 
-#: um-profile-content-moderation.php:1777
+#: um-profile-content-moderation.php:1822
 msgid "Admin Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1834
+#: um-profile-content-moderation.php:1879
 msgid "Admin Pending Notification Email template"
 msgstr ""
 
-#: um-profile-content-moderation.php:1689
+#: um-profile-content-moderation.php:1734
 msgid "Allow Users Login"
 msgstr ""
 
-#: um-profile-content-moderation.php:911
+#: um-profile-content-moderation.php:940
 msgid "Approve Profile Update"
 msgstr ""
 
-#: um-profile-content-moderation.php:1669
+#: um-profile-content-moderation.php:1714
 msgid "Blank URL disables link and \"Edit Profile\" text."
 msgstr ""
 
-#: um-profile-content-moderation.php:1698
+#: um-profile-content-moderation.php:1743
 msgid "Click to disable Admin updates of Users from Content Moderation."
 msgstr ""
 
-#: um-profile-content-moderation.php:1690
+#: um-profile-content-moderation.php:1735
 msgid ""
 "Click to disable UM status logincheck of Users not approved yet in Content "
 "Moderation."
 msgstr ""
 
-#: um-profile-content-moderation.php:1600
+#: um-profile-content-moderation.php:1645
 msgid ""
 "Click to enable a \"days since update\" colored Profile circle after the "
 "Profile page User name."
 msgstr ""
 
-#: um-profile-content-moderation.php:1712
+#: um-profile-content-moderation.php:1757
 msgid ""
 "Click to enable Admin Review after successful Email Activation by the User."
 msgstr ""
 
-#: um-profile-content-moderation.php:1616
+#: um-profile-content-moderation.php:1661
 msgid ""
 "Click to enable increased transparency of the \"days since update\" Profile "
 "circle for each day after approved update."
 msgstr ""
 
-#: um-profile-content-moderation.php:1643
+#: um-profile-content-moderation.php:1688
 msgid ""
 "Click to enable the delay of the User Profile update until approved by a "
 "site Moderator."
 msgstr ""
 
-#: um-profile-content-moderation.php:1587
+#: um-profile-content-moderation.php:1632
 msgid "Click to enable the UM Dashboard modal for Content Moderation."
 msgstr ""
 
-#: um-profile-content-moderation.php:589 um-profile-content-moderation.php:628
-#: um-profile-content-moderation.php:1281
-#: um-profile-content-moderation.php:1282
+#: um-profile-content-moderation.php:618 um-profile-content-moderation.php:657
+#: um-profile-content-moderation.php:1326
+#: um-profile-content-moderation.php:1327
 msgid "Content Moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:321
+#: um-profile-content-moderation.php:330
 #, php-format
 msgid "Content Moderation - %s waiting"
 msgstr ""
 
-#: um-profile-content-moderation.php:1833
+#: um-profile-content-moderation.php:1878
 msgid "Content Moderation - Admin Pending Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1803
+#: um-profile-content-moderation.php:1848
 msgid "Content Moderation - User Accept Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1813
+#: um-profile-content-moderation.php:1858
 msgid "Content Moderation - User Denial Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1793
+#: um-profile-content-moderation.php:1838
 msgid "Content Moderation - User Pending Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1823
+#: um-profile-content-moderation.php:1868
 msgid "Content Moderation - User Rollback Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:532
+#: um-profile-content-moderation.php:541
 #, php-format
 msgid ""
 "Content Moderation removed %s left User Profile update values and all "
 "Moderation cache counters."
 msgstr ""
 
-#: um-profile-content-moderation.php:536
+#: um-profile-content-moderation.php:545
 msgid "Content Moderation removed all Moderation cache counters."
 msgstr ""
 
-#: um-profile-content-moderation.php:1452
+#: um-profile-content-moderation.php:1497
 msgid "cURL extension not loaded by PHP"
 msgstr ""
 
-#: um-profile-content-moderation.php:1608
+#: um-profile-content-moderation.php:1653
 msgid "Default color is \"white\" and is displayed for 7 days."
 msgstr ""
 
-#: um-profile-content-moderation.php:1633
+#: um-profile-content-moderation.php:1678
 msgid "Default: User set to UM \"Admin Review\" status with Profile updated."
 msgstr ""
 
-#: um-profile-content-moderation.php:1642
-#: um-profile-content-moderation.php:1655
+#: um-profile-content-moderation.php:1687
+#: um-profile-content-moderation.php:1700
 msgid "Delay User Profile update during Moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:1677
+#: um-profile-content-moderation.php:1722
 msgid "Delay User Profile update text at the Cog wheel menu"
 msgstr ""
 
-#: um-profile-content-moderation.php:1666
+#: um-profile-content-moderation.php:1711
 msgid "Delay User Profile update URL at the Cog wheel menu"
 msgstr ""
 
-#: um-profile-content-moderation.php:919
+#: um-profile-content-moderation.php:948
 msgid "Deny Profile Update"
 msgstr ""
 
-#: um-profile-content-moderation.php:1697
+#: um-profile-content-moderation.php:1742
 msgid "Disable Admin updates Moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:444
+#: um-profile-content-moderation.php:453
 msgid "Email active"
 msgstr ""
 
-#: um-profile-content-moderation.php:444
+#: um-profile-content-moderation.php:453
 msgid "Email not active"
 msgstr ""
 
-#: um-profile-content-moderation.php:1723
-#: um-profile-content-moderation.php:1735
-#: um-profile-content-moderation.php:1747
-#: um-profile-content-moderation.php:1759
-#: um-profile-content-moderation.php:1772
+#: um-profile-content-moderation.php:1768
+#: um-profile-content-moderation.php:1780
+#: um-profile-content-moderation.php:1792
+#: um-profile-content-moderation.php:1804
+#: um-profile-content-moderation.php:1817
 msgid "Email settings"
 msgstr ""
 
-#: um-profile-content-moderation.php:1719
+#: um-profile-content-moderation.php:1764
 msgid "Email Templates"
 msgstr ""
 
-#: um-profile-content-moderation.php:1711
+#: um-profile-content-moderation.php:1756
 msgid "Enable Email Activation plus Admin Review"
 msgstr ""
 
-#: um-profile-content-moderation.php:1615
+#: um-profile-content-moderation.php:1660
 msgid "Enable transparency increase for the Profile circle"
 msgstr ""
 
-#: um-profile-content-moderation.php:1599
+#: um-profile-content-moderation.php:1644
 msgid "Enable User Update Status"
 msgstr ""
 
-#: um-profile-content-moderation.php:1678
+#: um-profile-content-moderation.php:1723
 msgid ""
 "Enter a short URL text message. Default text is \"Why Content Moderation\"."
 msgstr ""
 
-#: um-profile-content-moderation.php:1667
+#: um-profile-content-moderation.php:1712
 msgid ""
 "Enter an URL to a page where you explain the Content Moderation with delayed "
 "update procedure at your site."
 msgstr ""
 
-#: um-profile-content-moderation.php:1607
+#: um-profile-content-moderation.php:1652
 msgid ""
 "Enter colors either by color name or HEX code comma separated for each day's "
 "display of the \"days since update\" Profile circle."
 msgstr ""
 
-#: um-profile-content-moderation.php:1606
+#: um-profile-content-moderation.php:1651
 msgid "Enter colors for the Profile circle"
 msgstr ""
 
-#: um-profile-content-moderation.php:1625
+#: um-profile-content-moderation.php:1670
 msgid ""
 "Enter size in pixels for the \"days since update\" Profile circle. Default "
 "value is 24 pixels."
 msgstr ""
 
-#: um-profile-content-moderation.php:1623
+#: um-profile-content-moderation.php:1668
 msgid "Enter size in pixels for the Profile circle"
 msgstr ""
 
@@ -247,21 +263,21 @@ msgstr ""
 msgid "Extension to Ultimate Member for Profile Content Moderation."
 msgstr ""
 
-#: um-profile-content-moderation.php:835
+#: um-profile-content-moderation.php:864
 msgid "Format changes only"
 msgstr ""
 
-#: um-profile-content-moderation.php:1434
-#: um-profile-content-moderation.php:1539
+#: um-profile-content-moderation.php:1479
+#: um-profile-content-moderation.php:1584
 msgid "GitHub plugin documentation and download"
 msgstr ""
 
-#: um-profile-content-moderation.php:1439
+#: um-profile-content-moderation.php:1484
 #, php-format
 msgid "Github plugin version status is checked each 24 hours last at %s."
 msgstr ""
 
-#: um-profile-content-moderation.php:1448
+#: um-profile-content-moderation.php:1493
 #, php-format
 msgid "GitHub remote connection cURL error: %s"
 msgstr ""
@@ -274,16 +290,16 @@ msgstr ""
 msgid "https://github.com/MissVeronica/um-profile-content-moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:854
+#: um-profile-content-moderation.php:883
 msgid "Image/File updates are not logged at the moment."
 msgstr ""
 
-#: um-profile-content-moderation.php:723
+#: um-profile-content-moderation.php:752
 #, php-format
 msgid "Last Profile Rollback of updates %s"
 msgstr ""
 
-#: um-profile-content-moderation.php:1668
+#: um-profile-content-moderation.php:1713
 msgid ""
 "Link replaces \"Edit Profile\" when user is awaiting Content Moderation."
 msgstr ""
@@ -292,197 +308,197 @@ msgstr ""
 msgid "Miss Veronica"
 msgstr ""
 
-#: um-profile-content-moderation.php:429
+#: um-profile-content-moderation.php:438
 #, php-format
 msgid "Moderated Forms: %s"
 msgstr ""
 
-#: um-profile-content-moderation.php:428
+#: um-profile-content-moderation.php:437
 #, php-format
 msgid "Moderated Roles: %s"
 msgstr ""
 
-#: um-profile-content-moderation.php:887
+#: um-profile-content-moderation.php:916
 msgid "Moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:1554
+#: um-profile-content-moderation.php:1599
 msgid "Moderation Forms & Roles"
 msgstr ""
 
-#: um-profile-content-moderation.php:1632
+#: um-profile-content-moderation.php:1677
 msgid "Moderation Process"
 msgstr ""
 
-#: um-profile-content-moderation.php:733
+#: um-profile-content-moderation.php:762
 msgid "New:"
 msgstr ""
 
-#: um-profile-content-moderation.php:700
+#: um-profile-content-moderation.php:729
 msgid "No access"
 msgstr ""
 
-#: um-profile-content-moderation.php:747
+#: um-profile-content-moderation.php:776
 #, php-format
 msgid "No rollback possible for the meta_key %s"
 msgstr ""
 
-#: um-profile-content-moderation.php:744
+#: um-profile-content-moderation.php:773
 msgid "No text"
 msgstr ""
 
-#: um-profile-content-moderation.php:853
+#: um-profile-content-moderation.php:882
 msgid "No updates found"
 msgstr ""
 
-#: um-profile-content-moderation.php:365
+#: um-profile-content-moderation.php:374
 msgid "No users"
 msgstr ""
 
-#: um-profile-content-moderation.php:396 um-profile-content-moderation.php:411
+#: um-profile-content-moderation.php:405 um-profile-content-moderation.php:420
 msgid "None"
 msgstr ""
 
-#: um-profile-content-moderation.php:732
+#: um-profile-content-moderation.php:761
 msgid "Old:"
 msgstr ""
 
-#: um-profile-content-moderation.php:369
+#: um-profile-content-moderation.php:378
 msgid "One user"
 msgstr ""
 
-#: um-profile-content-moderation.php:1634
+#: um-profile-content-moderation.php:1679
 msgid ""
 "Option from version 3.6.0: Delayed Profile update until approved by a site "
 "Moderator."
 msgstr ""
 
-#: um-profile-content-moderation.php:1650
+#: um-profile-content-moderation.php:1695
 msgid "Option is disabled"
 msgstr ""
 
-#: um-profile-content-moderation.php:1649
+#: um-profile-content-moderation.php:1694
 msgid "Option is enabled"
 msgstr ""
 
-#: um-profile-content-moderation.php:1540
+#: um-profile-content-moderation.php:1585
 msgid "Plugin"
 msgstr ""
 
-#: um-profile-content-moderation.php:1435
+#: um-profile-content-moderation.php:1480
 msgid "Plugin documentation"
 msgstr ""
 
-#: um-profile-content-moderation.php:1418
+#: um-profile-content-moderation.php:1463
 #, php-format
 msgid "Plugin is updated to the latest version %s."
 msgstr ""
 
-#: um-profile-content-moderation.php:424 um-profile-content-moderation.php:1789
+#: um-profile-content-moderation.php:433 um-profile-content-moderation.php:1834
 msgid "Plugin settings"
 msgstr ""
 
-#: um-profile-content-moderation.php:1379
+#: um-profile-content-moderation.php:1424
 msgid "Plugin version update failure"
 msgstr ""
 
-#: um-profile-content-moderation.php:1426
+#: um-profile-content-moderation.php:1471
 msgid "Plugin version update validation failure"
 msgstr ""
 
-#: um-profile-content-moderation.php:1413
+#: um-profile-content-moderation.php:1458
 msgid "Plugin version update verification failed"
 msgstr ""
 
-#: um-profile-content-moderation.php:1517
+#: um-profile-content-moderation.php:1562
 msgid "Profile Content Moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:1563
+#: um-profile-content-moderation.php:1608
 msgid "Profile Forms to Moderate"
 msgstr ""
 
-#: um-profile-content-moderation.php:715
+#: um-profile-content-moderation.php:744
 #, php-format
 msgid "Profile Update Denial sent %s"
 msgstr ""
 
-#: um-profile-content-moderation.php:710
+#: um-profile-content-moderation.php:739
 #, php-format
 msgid "Profile Update submitted %s by User %s"
 msgstr ""
 
-#: um-profile-content-moderation.php:1705
+#: um-profile-content-moderation.php:1750
 msgid "Registration Approval"
 msgstr ""
 
-#: um-profile-content-moderation.php:469
+#: um-profile-content-moderation.php:478
 msgid "Reset any left User Profile update values and Moderation cache counters"
 msgstr ""
 
-#: um-profile-content-moderation.php:468
+#: um-profile-content-moderation.php:477
 msgid "Reset Moderation cache counters"
 msgstr ""
 
-#: um-profile-content-moderation.php:865
+#: um-profile-content-moderation.php:894
 msgid "Review Profile Content Moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:873
+#: um-profile-content-moderation.php:902
 msgid "Review Registration Details"
 msgstr ""
 
-#: um-profile-content-moderation.php:916
+#: um-profile-content-moderation.php:945
 msgid "Rollback Profile Update"
 msgstr ""
 
-#: um-profile-content-moderation.php:1564
+#: um-profile-content-moderation.php:1609
 msgid "Select single or multiple Profile Forms for Content Moderation."
 msgstr ""
 
-#: um-profile-content-moderation.php:1778
+#: um-profile-content-moderation.php:1823
 msgid "Select the Admin Notification Email template."
 msgstr ""
 
-#: um-profile-content-moderation.php:1741
+#: um-profile-content-moderation.php:1786
 msgid "Select the User Accept Notification Email template."
 msgstr ""
 
-#: um-profile-content-moderation.php:1753
+#: um-profile-content-moderation.php:1798
 msgid "Select the User Denial Notification Email template."
 msgstr ""
 
-#: um-profile-content-moderation.php:1729
+#: um-profile-content-moderation.php:1774
 msgid "Select the User Pending Notification Email template."
 msgstr ""
 
-#: um-profile-content-moderation.php:1572
+#: um-profile-content-moderation.php:1617
 msgid "Select the User Role(s) to be included in Content Moderation."
 msgstr ""
 
-#: um-profile-content-moderation.php:1765
+#: um-profile-content-moderation.php:1810
 msgid "Select the User Rollback Notification Email template."
 msgstr ""
 
-#: um-profile-content-moderation.php:1657
+#: um-profile-content-moderation.php:1702
 msgid ""
 "Settings are only displayed for changes when the queue of users waiting for "
 "approval is empty."
 msgstr ""
 
-#: um-profile-content-moderation.php:448
+#: um-profile-content-moderation.php:457
 msgid "Template not found"
 msgstr ""
 
-#: um-profile-content-moderation.php:172
+#: um-profile-content-moderation.php:181
 msgid "The latest update of the User Profile: today"
 msgstr ""
 
-#: um-profile-content-moderation.php:173
+#: um-profile-content-moderation.php:182
 msgid "The latest update of the User Profile: yesterday"
 msgstr ""
 
-#: um-profile-content-moderation.php:174
+#: um-profile-content-moderation.php:183
 #, php-format
 msgid "Time since the latest update of the User Profile: %d days ago %s"
 msgstr ""
@@ -491,81 +507,81 @@ msgstr ""
 msgid "Ultimate Member - Profile Content Moderation"
 msgstr ""
 
-#: um-profile-content-moderation.php:1580
+#: um-profile-content-moderation.php:1625
 msgid "UM Dashboard"
 msgstr ""
 
-#: um-profile-content-moderation.php:1586
+#: um-profile-content-moderation.php:1631
 msgid "UM Dashboard Modal"
 msgstr ""
 
-#: um-profile-content-moderation.php:1713
+#: um-profile-content-moderation.php:1758
 msgid "UM Setting Registration email Activation must be set in advance."
 msgstr ""
 
-#: um-profile-content-moderation.php:1420
+#: um-profile-content-moderation.php:1465
 msgid "Unknown encoding format returned from GitHub"
 msgstr ""
 
-#: um-profile-content-moderation.php:1416
+#: um-profile-content-moderation.php:1461
 #, php-format
 msgid "Update to %s plugin version %s%s is now available for download."
 msgstr ""
 
-#: um-profile-content-moderation.php:1424
+#: um-profile-content-moderation.php:1469
 #, php-format
 msgid "Update to plugin version %s is now available for download from GitHub."
 msgstr ""
 
-#: um-profile-content-moderation.php:598
+#: um-profile-content-moderation.php:627
 msgid "Update/Denial"
 msgstr ""
 
-#: um-profile-content-moderation.php:1740
+#: um-profile-content-moderation.php:1785
 msgid "User Accept Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1804
+#: um-profile-content-moderation.php:1849
 msgid "User Accepted Notification Email template"
 msgstr ""
 
-#: um-profile-content-moderation.php:1752
+#: um-profile-content-moderation.php:1797
 msgid "User Denial Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1814
+#: um-profile-content-moderation.php:1859
 msgid "User Denial Notification Email template"
 msgstr ""
 
-#: um-profile-content-moderation.php:1593
+#: um-profile-content-moderation.php:1638
 msgid "User Info"
 msgstr ""
 
-#: um-profile-content-moderation.php:1728
+#: um-profile-content-moderation.php:1773
 msgid "User Pending Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1794
+#: um-profile-content-moderation.php:1839
 msgid "User Pending Notification Email template"
 msgstr ""
 
-#: um-profile-content-moderation.php:1571
+#: um-profile-content-moderation.php:1616
 msgid "User Roles to Moderate"
 msgstr ""
 
-#: um-profile-content-moderation.php:1764
+#: um-profile-content-moderation.php:1809
 msgid "User Rollback Notification"
 msgstr ""
 
-#: um-profile-content-moderation.php:1824
+#: um-profile-content-moderation.php:1869
 msgid "User Rollback Notification Email template"
 msgstr ""
 
-#: um-profile-content-moderation.php:1422
+#: um-profile-content-moderation.php:1467
 msgid "Version number not found"
 msgstr ""
 
-#: um-profile-content-moderation.php:247
+#: um-profile-content-moderation.php:256
 msgid "Why Content Moderation"
 msgstr ""
 
