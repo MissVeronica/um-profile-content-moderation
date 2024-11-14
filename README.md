@@ -8,6 +8,8 @@ Unapproved Profile updates may or may not be allowed to login as of version 3.3.
 
 Version 3.6.0 allows the User to continue without approval using old Profile data until approved by a Moderator when the User Profile real update is performed.
 
+Registration Approval - Known issue from UM version 2.8.7
+
 ## UM Settings -> Extensions -> Profile Content Moderation
 Plugin version update check each 24 hours with documentation link.
 ### Moderation Forms & Roles
