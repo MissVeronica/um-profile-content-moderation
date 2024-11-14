@@ -32,7 +32,7 @@ Settings are only displayed for changes when the queue of users waiting for appr
 12. * Disable Admin updates Moderation - Click to disable Admin updates of Users from Content Moderation.
 13. * Allow Users Login - Click to disable UM status logincheck of Users not approved yet in Content Moderation.
 ### Registration Approval - Known issue from UM version 2.8.7
-14. * Enable Email Activation plus Admin Review - Click to enable Admin Review after successful Email Activation by the User. UM Setting Registration email Activation must be set in advance. NOTE This option no longer works from UM version 2.8.7. Use the new plugin "Email Activation and Admin Review" https://github.com/MissVeronica/um-email-activation-admin-review
+14. * Enable Email Activation plus Admin Review - Click to enable Admin Review after successful Email Activation by the User. UM Setting Registration email Activation must be set in advance. NOTE This option no longer works as expected from UM version 2.8.7. Use the new plugin "Email Activation and Admin Review" https://github.com/MissVeronica/um-email-activation-admin-review
 ### Email Templates
 15. * User Pending Notification - Select the User Pending Notification Email template.
 16. * User Accept Notification - Select the User Accept Notification Email template. 
