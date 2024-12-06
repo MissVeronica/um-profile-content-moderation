@@ -67,6 +67,9 @@ Settings are only displayed for changes when the queue of users waiting for appr
 8. For User Role dependant email content, use the "Email Parse Shortcode" plugin.
 9. https://github.com/MissVeronica/um-email-parse-shortcode
 
+## Image Moderation
+1. Try to use the "Account File Manager" plugin https://github.com/MissVeronica/um-account-file-manager
+
 ## Translations & Text changes
 1. Use the "Loco Translate" plugin.
 2. https://wordpress.org/plugins/loco-translate/
