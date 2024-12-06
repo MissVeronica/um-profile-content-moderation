@@ -67,9 +67,6 @@ Settings are only displayed for changes when the queue of users waiting for appr
 8. For User Role dependant email content, use the "Email Parse Shortcode" plugin.
 9. https://github.com/MissVeronica/um-email-parse-shortcode
 
-## Image Moderation
-1. Try to use the "Account File Manager" plugin https://github.com/MissVeronica/um-account-file-manager
-
 ## Translations & Text changes
 1. Use the "Loco Translate" plugin.
 2. https://wordpress.org/plugins/loco-translate/
@@ -98,7 +95,7 @@ Settings are only displayed for changes when the queue of users waiting for appr
 19. Version 3.7.0 Support for UM 2.8.7. New design of UM Bulk User Actions. Fix for issue Profiles with Roles not selected for moderation when delayed update is active.
 20. Version 3.7.1 Update for conflict in UM Bulk User Actions and Admin notices. Code improvements.
 
-## Account File Manager
+## Image Moderation - Account File Manager
 1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
 
 ## Installation
