@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.7.1
+ * Version:             3.7.2
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -1442,7 +1442,7 @@ class UM_Profile_Content_Moderation {
 
                         $curl = curl_init();
                         curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-                        curl_setopt( $curl, CURLOPT_BINARYTRANSFER, 1 );
+                        //curl_setopt( $curl, CURLOPT_BINARYTRANSFER, 1 );
                         curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, 1 );
                         curl_setopt( $curl, CURLOPT_URL, $url );
                         curl_setopt( $curl, CURLOPT_USERAGENT, $github_user );
