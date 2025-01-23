@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.7.2
+ * Version:             3.7.3
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -1101,7 +1101,7 @@ class UM_Profile_Content_Moderation {
                 update_user_meta( $user_id, 'um_content_moderation_update', $this->last_midnight_today() );
                 $this->count_content_values( 'um_content_moderation', -1 );
 
-                $this->send( um_user( 'user_email' ), UM()->options()->get( 'content_moderation_accept_user_email' ) );
+                $this->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_accept_user_email' ) );
 
                 if ( ! empty( $whitelist_saved )) {
                     UM()->form()->usermeta_whitelist = $whitelist_saved;
