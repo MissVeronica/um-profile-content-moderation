@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.7.3
+ * Version:             3.7.4
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -12,7 +12,7 @@
  * Update URI:          https://github.com/MissVeronica/um-profile-content-moderation
  * Text Domain:         content-moderation
  * Domain Path:         /languages
- * UM version:          2.8.7
+ * UM version:          2.9.2
  * Source computeDiff:  https://stackoverflow.com/questions/321294/highlight-the-difference-between-two-strings-in-php
  */
 
@@ -26,8 +26,8 @@ class UM_Profile_Content_Moderation {
     public $slugs                = array();
     public $update_field_types   = array();
     public $not_update_user_keys = array( 'role', 'pass', 'password' );
+    public $moderation_action    = array();
 
-    public $send_email           = true;
     public $moderation_count     = '';
     public $transient_name       = 'content_moderation_';
     public $transient_life       = 5 * DAY_IN_SECONDS;
@@ -250,15 +250,8 @@ class UM_Profile_Content_Moderation {
 
                 $url_text = sanitize_text_field( UM()->options()->get( 'um_content_moderation_delay_url_text' ));
 
-                $items['editprofile'] = '<a href="' . esc_url( $url ) . '" class="real_url" target="_blank">';
-
-                if ( empty( $url_text )) {
-                    $items['editprofile'] .=  esc_html__( 'Why Content Moderation', 'content-moderation' );
-
-                } else {
-                    $items['editprofile'] .=  esc_attr( $url_text );
-                }
-
+                $items['editprofile']  = '<a href="' . esc_url( $url ) . '" class="real_url" target="_blank">';
+                $items['editprofile'] .= ( empty( $url_text )) ? esc_html__( 'Why Content Moderation', 'content-moderation' ) : esc_attr( $url_text );
                 $items['editprofile'] .= '</a>'; 
 
             } else {
@@ -283,21 +276,23 @@ class UM_Profile_Content_Moderation {
         if ( ! is_user_logged_in() ) {
 
             $user_id = ( isset( UM()->login()->auth_id ) ) ? UM()->login()->auth_id : '';
-            um_fetch_user( $user_id );
+            if ( ! empty( $user_id )) {
+                um_fetch_user( $user_id );
 
-            $status = um_user( 'account_status' );
-            if ( $status == 'awaiting_admin_review' ) {
+                $status = um_user( 'account_status' );
+                if ( $status == 'awaiting_admin_review' ) {
 
-                $um_content_moderation = um_user( 'um_content_moderation' );
-                if ( ! empty( $um_content_moderation ) && (int)$um_content_moderation > 1000 ) {
+                    $um_content_moderation = um_user( 'um_content_moderation' );
+                    if ( ! empty( $um_content_moderation ) && (int)$um_content_moderation > 1000 ) {
 
-                    remove_action( 'um_submit_form_errors_hook_logincheck', 'um_submit_form_errors_hook_logincheck', 9999, 2 );
+                        remove_action( 'um_submit_form_errors_hook_logincheck', 'um_submit_form_errors_hook_logincheck', 9999, 2 );
 
-                    if ( isset( $form_data['form_id'] ) && absint( $form_data['form_id'] ) === absint( UM()->shortcodes()->core_login_form() )
-                                                        && UM()->form()->errors && ! isset( $_POST[ UM()->honeypot ] ) ) {
+                        if ( isset( $form_data['form_id'] ) && absint( $form_data['form_id'] ) === absint( UM()->shortcodes()->core_login_form() )
+                                                            && UM()->form()->errors && ! isset( $_POST[ UM()->honeypot ] ) ) {
 
-                        wp_safe_redirect( um_get_core_page( 'login' ) );
-                        exit;
+                            wp_safe_redirect( um_get_core_page( 'login' ) );
+                            exit;
+                        }
                     }
                 }
             }
@@ -338,13 +333,7 @@ class UM_Profile_Content_Moderation {
 
         global $wpdb;
 
-        if ( isset( $this->cached_meta_values[$meta_key] ) && $this->cached_meta_values[$meta_key] !== false ) {
-            $counter = $this->cached_meta_values[$meta_key];
-
-        } else {
-            $counter = get_transient( $this->transient_name . $meta_key );
-        }
-
+        $counter = ( isset( $this->cached_meta_values[$meta_key] ) && $this->cached_meta_values[$meta_key] !== false ) ? $this->cached_meta_values[$meta_key] : get_transient( $this->transient_name . $meta_key );
         if ( $counter === false ) {
 
             $counter = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key = '{$meta_key}' AND meta_value > '0' " );
@@ -370,13 +359,7 @@ class UM_Profile_Content_Moderation {
 
     public function format_users( $counter ) {
 
-        if ( $counter == 0 ) {
-            $count_users = esc_html__( 'No users', 'content-moderation' );
-
-        } else {
-
-            $count_users = ( $counter > 1 ) ? sprintf( esc_html__( '%d users', 'content-moderation' ), $counter ) : esc_html__( 'One user', 'content-moderation' );
-        }
+        $count_users = ( $counter == 0 ) ? esc_html__( 'No users', 'content-moderation' ) : (( $counter > 1 ) ? sprintf( esc_html__( '%d users', 'content-moderation' ), $counter ) : esc_html__( 'One user', 'content-moderation' ));
 
         return $count_users;
     }
@@ -778,17 +761,8 @@ class UM_Profile_Content_Moderation {
 
                     if ( empty( $meta_value['old'] ) || empty( $meta_value['new'] )) {
 
-                        if ( empty( $meta_value['old'] )) {
-                            $text_old = esc_html__( '(empty)', 'content-moderation' );
-                        } else {
-                            $text_old = $meta_value['old'];
-                        }
-
-                        if ( empty( $meta_value['new'] )) {
-                            $text_new = esc_html__( '(empty)', 'content-moderation' );
-                        } else {
-                            $text_new = $meta_value['new'];
-                        }
+                        $text_old = ( empty( $meta_value['old'] )) ? esc_html__( '(empty)', 'content-moderation' ) : $meta_value['old'];
+                        $text_new = ( empty( $meta_value['new'] )) ? esc_html__( '(empty)', 'content-moderation' ) : $meta_value['new'];
 
                     } else {
 
@@ -947,7 +921,7 @@ class UM_Profile_Content_Moderation {
 
             $sub_actions['um_deny_profile_update'] = esc_html__( 'Deny Profile Update', 'content-moderation' );
 
-            $actions[ esc_html__( 'UM Content Moderation', 'ultimate-member' ) ] = $sub_actions;
+            $actions[ esc_html__( 'UM Content Moderation', 'content-moderation' ) ] = $sub_actions;
         }
 
         return $actions;
@@ -955,35 +929,46 @@ class UM_Profile_Content_Moderation {
 
     public function content_moderation_action( $user_id = false ) {
 
-        if ( current_user_can( 'administrator' ) && UM()->options()->get( 'um_content_moderation_admin_disable' ) == 1 ) {
+        global $current_user;
 
-            return false;
-        }
+        if ( ! empty( $user_id )) {
 
-        $um_content_moderation_forms = UM()->options()->get( 'um_content_moderation_forms' );
+            if ( isset( $this->moderation_action[$user_id] )) {
+                switch( $this->moderation_action[$user_id] ) {
 
-        if ( ! empty( $um_content_moderation_forms )) {
-            $um_content_moderation_forms = array_map( 'sanitize_text_field', $um_content_moderation_forms );
-
-            if ( isset( $_POST['form_id'] ) && ! empty( $_POST['form_id'] )) {
-                $form_id = sanitize_text_field( $_POST['form_id'] );
-            } else {
-                $form_id = UM()->shortcodes()->form_id;
+                    case 0:     return false;
+                    case 1:     return true;
+                    default:    break;
+                }
             }
 
-            if ( in_array( $form_id, $um_content_moderation_forms )) {
+            if ( $current_user->ID == $user_id && current_user_can( 'administrator' ) && UM()->options()->get( 'um_content_moderation_admin_disable' ) == 1 ) {
+                $this->moderation_action[$user_id] = 0;
+                return false;
+            }
 
-                $um_content_moderation_roles = UM()->options()->get( 'um_content_moderation_roles' );
+            $um_content_moderation_forms = UM()->options()->get( 'um_content_moderation_forms' );
 
-                if ( ! empty( $um_content_moderation_roles )) {
-                    if ( ! empty( $user_id ) && in_array( UM()->roles()->get_priority_user_role( $user_id ), array_map( 'sanitize_text_field', $um_content_moderation_roles ))) {
+            if ( ! empty( $um_content_moderation_forms )) {
+                $um_content_moderation_forms = array_map( 'sanitize_text_field', $um_content_moderation_forms );
 
-                        return true;
+                $form_id = ( isset( $_POST['form_id'] ) && ! empty( $_POST['form_id'] )) ? sanitize_text_field( $_POST['form_id'] ) : UM()->shortcodes()->form_id;
+
+                if ( in_array( $form_id, $um_content_moderation_forms )) {
+
+                    $um_content_moderation_roles = UM()->options()->get( 'um_content_moderation_roles' );
+                    if ( ! empty( $um_content_moderation_roles )) {
+
+                        if ( in_array( UM()->roles()->get_priority_user_role( $user_id ), array_map( 'sanitize_text_field', $um_content_moderation_roles ))) {
+                            $this->moderation_action[$user_id] = 1;
+                            return true;
+                        }
                     }
                 }
             }
         }
 
+        $this->moderation_action[$user_id] = 0;
         return false;
     }
 
@@ -1289,13 +1274,7 @@ class UM_Profile_Content_Moderation {
 
         $attachments = array();
         $headers     = 'From: ' . stripslashes( UM()->options()->get( 'mail_from' ) ) . ' <' . esc_attr( UM()->options()->get( 'mail_from_addr' )) . '>' . "\r\n";
-
-        if ( UM()->options()->get( 'email_html' ) == 1 ) {
-            $headers .= "Content-Type: text/html\r\n";
-        } else {
-            $headers .= "Content-Type: text/plain\r\n";
-        }
-
+        $headers    .= ( UM()->options()->get( 'email_html' ) == 1 ) ? "Content-Type: text/html\r\n" : "Content-Type: text/plain\r\n";
         wp_mail( $email, $subject, $message, $headers, $attachments );
     }
 
@@ -1355,15 +1334,8 @@ class UM_Profile_Content_Moderation {
                     $diff_updates[$meta_key]['old'] = um_user( $meta_key );
                 }
 
-                $diff_updates[$meta_key]['new'] = $meta_value;
-
-                if ( isset( $this->update_field_types[$meta_key] )) {
-                    $diff_updates[$meta_key]['type'] = $this->update_field_types[$meta_key];
-
-                } else {
-
-                    $diff_updates[$meta_key]['type'] = 'text';
-                }
+                $diff_updates[$meta_key]['new']  = $meta_value;
+                $diff_updates[$meta_key]['type'] = ( isset( $this->update_field_types[$meta_key] )) ? $this->update_field_types[$meta_key] : 'text';
             }
 
             update_user_meta( $user_id, 'um_diff_updates', $diff_updates );
@@ -1372,38 +1344,33 @@ class UM_Profile_Content_Moderation {
 
                 update_user_meta( $user_id, 'um_content_moderation', current_time( 'timestamp' ) );
                 $this->count_content_values( 'um_content_moderation', 1 );
-
-            } else {
-                $this->send_email = false;
             }
         }
     }
 
     public function um_user_after_updating_profile_set_pending( $to_update, $user_id, $args ) {
 
-        if ( $this->send_email ) {
-            if ( ! empty( $user_id )) {
+        if ( ! empty( $user_id ) && $this->content_moderation_action( $user_id )) {
 
-                um_fetch_user( $user_id );
+            um_fetch_user( $user_id );
 
-                add_filter( 'um_template_tags_patterns_hook', array( $this, 'content_moderation_template_tags_patterns' ), 10, 1 );
-                add_filter( 'um_template_tags_replaces_hook', array( $this, 'content_moderation_template_tags_replaces' ), 10, 1 );
+            add_filter( 'um_template_tags_patterns_hook', array( $this, 'content_moderation_template_tags_patterns' ), 10, 1 );
+            add_filter( 'um_template_tags_replaces_hook', array( $this, 'content_moderation_template_tags_replaces' ), 10, 1 );
 
-                if ( UM()->options()->get( 'um_content_moderation_delay_update' ) != 1 ) {
-                    if ( current_user_can( 'administrator' )) {
+            if ( UM()->options()->get( 'um_content_moderation_delay_update' ) != 1 ) {
+                if ( current_user_can( 'administrator' )) {
 
-                        if ( UM()->options()->get( 'um_content_moderation_admin_disable' ) != 1 ) {
-                            UM()->common()->users()->set_status( $user_id, 'awaiting_admin_review' );  // UM2.8.7
-                        }
-
-                    } else {
+                    if ( UM()->options()->get( 'um_content_moderation_admin_disable' ) != 1 ) {
                         UM()->common()->users()->set_status( $user_id, 'awaiting_admin_review' );  // UM2.8.7
                     }
-                }
 
-                UM()->mail()->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_pending_user_email' ) );
-                UM()->mail()->send( get_bloginfo( 'admin_email' ), UM()->options()->get( 'um_content_moderation_admin_email' ), array( 'admin' => true ) );
+                } else {
+                    UM()->common()->users()->set_status( $user_id, 'awaiting_admin_review' );  // UM2.8.7
+                }
             }
+
+            UM()->mail()->send( um_user( 'user_email' ), UM()->options()->get( 'um_content_moderation_pending_user_email' ) );
+            UM()->mail()->send( get_bloginfo( 'admin_email' ), UM()->options()->get( 'um_content_moderation_admin_email' ), array( 'admin' => true ) );
         }
     }
 
@@ -1442,7 +1409,6 @@ class UM_Profile_Content_Moderation {
 
                         $curl = curl_init();
                         curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-                        //curl_setopt( $curl, CURLOPT_BINARYTRANSFER, 1 );
                         curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, 1 );
                         curl_setopt( $curl, CURLOPT_URL, $url );
                         curl_setopt( $curl, CURLOPT_USERAGENT, $github_user );
@@ -1451,7 +1417,7 @@ class UM_Profile_Content_Moderation {
                         $error = curl_error( $curl );
                         curl_close( $curl );
 
-                        if ( ! $error ) {
+                        if ( empty( $error )) {
 
                             switch( $this->validate_new_plugin_version( $plugin_data, $content ) ) {
 
@@ -1505,10 +1471,7 @@ class UM_Profile_Content_Moderation {
 
     public function new_version_test_required( $transient, $plugin_data ) {
 
-        $bool = false;
-        if ( isset( $transient['last_version'] ) && $plugin_data['Version'] != $transient['last_version'] ) {
-            $bool = true;
-        }
+        $bool = ( isset( $transient['last_version'] ) && $plugin_data['Version'] != $transient['last_version'] ) ? true : false;
 
         return $bool;
     }
@@ -1980,6 +1943,4 @@ class UM_Profile_Content_Moderation {
 }
 
 new UM_Profile_Content_Moderation();
-
-
 
