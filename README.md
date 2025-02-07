@@ -1,5 +1,6 @@
 # Next major update of the plugin
-Addition of Cover and Profile photo uploads for Admin approval in the plugin option of delayed Profile text field's updates. Other Images and PDF file uploads will also be included.
+* Addition of Cover and Profile photo uploads for Admin approval in the plugin option of delayed Profile text field's updates. 
+* Other Images (stream_phot files) and other file uploads like PDF, MP3, MP4 etc will also be included for approvals.
 
 # UM Profile Content Moderation version 3.7.4
 
