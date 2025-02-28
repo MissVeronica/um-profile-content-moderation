@@ -1,4 +1,4 @@
-# Next major update of the plugin version 4.0.0
+# Next major update of the plugin - version 4.0.0
 * Addition of Cover and Profile photo uploads for Admin approval in the plugin option of delayed Profile text field's updates. 
 * Other Images (stream_photo files) and other file uploads like PDF, MP3, MP4 etc will also be included for approvals.
 * Current status: Final testing will be with UM version 2.10.1
