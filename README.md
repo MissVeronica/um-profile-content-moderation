@@ -102,6 +102,7 @@ Settings are only displayed for changes when the queue of users waiting for appr
 21. Version 3.7.2 Fix for sites using PHP 8.4 to avoid a deprecated message. No changes in Plugin functions.
 22. Version 3.7.3 Fix for "Content Moderation - User Accept Notification" not sent to User.
 23. Version 3.7.4 Fix for disable sending of Moderation emails to User and Admin for non-moderated Roles. Code improvements and test OK for PHP 8.4.2
+24. Version 3.7.5 Fix for PHP error during installation and plugin activation of email templates.
 
 ## Image Moderation - Account File Manager
 1. Profile/Cover photo updates and other uploaded files can be displayed with the <a href="https://github.com/MissVeronica/um-account-file-manager">UM Account File Manager</a> plugin
