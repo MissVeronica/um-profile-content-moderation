@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Ultimate Member - Profile Content Moderation
  * Description:         Extension to Ultimate Member for Profile Content Moderation.
- * Version:             3.7.4
+ * Version:             3.7.5
  * Requires PHP:        7.4
  * Author:              Miss Veronica
  * License:             GPL v3 or later
@@ -1856,7 +1856,7 @@ class UM_Profile_Content_Moderation {
             if ( UM()->options()->get( $slug . '_on' ) === '' ) {
 
                 $email_on = empty( $custom_email['default_active'] ) ? 0 : 1;
-                UM()->options()->update( $this->slug . '_on', $email_on );
+                UM()->options()->update( $slug . '_on', $email_on );
             }
 
             if ( UM()->options()->get( $slug . '_sub' ) === '' ) {
